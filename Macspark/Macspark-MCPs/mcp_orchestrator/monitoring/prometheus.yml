@@ -1,0 +1,75 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # MCP Orchestrator
+  - job_name: 'mcp-orchestrator'
+    static_configs:
+      - targets: ['mcp-orchestrator:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Ollama
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+    metrics_path: '/api/tags'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # LM Studio
+  - job_name: 'lm-studio'
+    static_configs:
+      - targets: ['lm-studio:1234']
+    metrics_path: '/v1/models'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Node Exporter (se disponível)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Docker containers
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['docker:9323']
+    scrape_interval: 15s
+
+# Alerting rules
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Recording rules
+rule_files:
+  - "mcp_orchestrator_rules.yml"
+
+# Storage
+storage:
+  tsdb:
+    path: /prometheus
+    retention.time: 200h
+    retention.size: 10GB
+
+# Remote write (opcional)
+# remote_write:
+#   - url: "http://remote-storage:9201/write"
+
+# Remote read (opcional)
+# remote_read:
+#   - url: "http://remote-storage:9201/read" 

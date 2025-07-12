@@ -1,0 +1,19 @@
+fastmcp
+anthropic
+google-generativeai
+openai
+mistralai
+cohere
+requests
+python-dotenv
+pydantic
+# Local LLM support
+ollama
+# Dev dependencies
+pytest
+pytest-asyncio
+pytest-cov
+black
+isort
+flake8
+mypy 
