@@ -26,7 +26,13 @@
       "Bash(chmod:*)",
       "Bash(/mnt/c/Users/marco/Macspark/Macspark-Setup/scripts/setup-dependabot.sh:*)",
       "Bash(bash:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(claude mcp list-tools:*)",
+      "Bash(claude mcp:*)",
+      "Bash(npm run optimize:build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run type-check:*)",
+      "Bash(git submodule:*)"
     ],
     "deny": []
   }
