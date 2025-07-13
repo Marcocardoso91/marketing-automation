@@ -25,7 +25,8 @@
       "Bash(npm install:*)",
       "Bash(chmod:*)",
       "Bash(/mnt/c/Users/marco/Macspark/Macspark-Setup/scripts/setup-dependabot.sh:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(git config:*)"
     ],
     "deny": []
   }
