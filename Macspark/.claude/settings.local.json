@@ -1,7 +1,31 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gemini:*)",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(npm outdated)",
+      "Bash(claude mcp add:*)",
+      "Bash(npm update:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(ls:*)",
+      "mcp__gemini-cli__ask-gemini",
+      "Bash(mkdir:*)",
+      "*",
+      "Bash(npm audit:*)",
+      "Bash(pip install:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(pipx install:*)",
+      "Bash(npm install:*)",
+      "Bash(chmod:*)",
+      "Bash(/mnt/c/Users/marco/Macspark/Macspark-Setup/scripts/setup-dependabot.sh:*)",
+      "Bash(bash:*)"
     ],
     "deny": []
   }

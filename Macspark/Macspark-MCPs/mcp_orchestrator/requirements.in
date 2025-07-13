@@ -1,0 +1,19 @@
+# Core MCP Framework
+fastmcp
+
+# AI Provider APIs
+anthropic
+google-generativeai
+openai
+mistralai
+cohere
+
+# Core utilities
+requests
+python-dotenv
+pydantic
+
+# Local LLM support
+ollama
+
+# Dev dependencies (will be in separate file)

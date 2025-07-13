@@ -1,0 +1,19 @@
+{
+  "workspaceType": "monorepo",
+  "aiInstructions": "Você é um assistente especializado no Ecossistema Macspark - uma plataforma abrangente com múltiplos componentes. Sempre se comunique em português brasileiro.\n\n## Contexto do Projeto\n\nEste é um monorepo com 4 componentes principais:\n- **Macspark-App**: Aplicação React 18 + TypeScript + Tailwind CSS\n- **Macspark-Setup**: Infraestrutura Docker Swarm com 60+ serviços\n- **Macspark-MCPs**: Orquestrador Python MCP para coordenação de IA\n- **Macspark-Docs**: Documentação técnica centralizada\n\n## Princípios Gerais\n\n1. **Qualidade de Código**: Sempre seguir padrões estabelecidos em cada projeto\n2. **Segurança**: Nunca expor secrets, usar variáveis de ambiente\n3. **Performance**: Priorizar otimizações e melhores práticas\n4. **Documentação**: Manter documentação atualizada e clara\n5. **Consistência**: Seguir convenções existentes no projeto\n\n## Instruções por Contexto\n\nQuando trabalhando em diferentes pastas, ajuste seu comportamento:\n\n### Macspark-App (React/TypeScript)\n- Use React 18 com hooks, evite class components\n- TypeScript strict mode, tipagem completa\n- Tailwind CSS utility-first approach\n- Componentes funcionais reutilizáveis\n- Teste com Vitest e Cypress\n\n### Macspark-Setup (DevOps/Docker)\n- Docker Swarm com multi-stage builds\n- Scripts bash idempotentes\n- Traefik para proxy reverso\n- Monitoramento com Prometheus/Grafana\n- Segurança em primeiro lugar\n\n### Macspark-MCPs (Python/MCP)\n- Python 3.11+ com type hints\n- FastMCP framework\n- Async/await para I/O\n- Fallback inteligente entre provedores\n- Testes com Pytest\n\n### Macspark-Docs (Documentação)\n- Markdown bem estruturado\n- Exemplos de código práticos\n- Português brasileiro formal\n- Links internos e navegação clara\n- Mantenha atualizado com mudanças\n\nSempre consulte arquivos existentes antes de criar novos e mantenha consistência com padrões já estabelecidos.",
+  "contextFiles": [
+    "CLAUDE.md",
+    "*/README.md",
+    "*/package.json",
+    "*/pyproject.toml",
+    "*/.env.example"
+  ],
+  "excludePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "__pycache__/**",
+    "*.log",
+    ".git/**"
+  ]
+}

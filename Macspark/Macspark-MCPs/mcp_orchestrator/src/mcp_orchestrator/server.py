@@ -1,19 +1,20 @@
 """
-MCP Orchestrator Server
-----------------------
-Servidor MCP híbrido para orquestração de múltiplos agentes de IA (APIs, CLIs, LLMs locais)
-com fallback inteligente e arquitetura extensível.
+MCP Orchestrator Server - Stateless Version
+-------------------------------------------
+Servidor MCP híbrido stateless para orquestração de múltiplos agentes de IA 
+com fallback inteligente, sessões Redis e arquitetura escalável.
 """
 import sys
 import os
 import logging
 import subprocess
 import json
-from typing import Dict, Any, Literal
+from typing import Dict, Any, Literal, Optional
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
 import requests
+from .utils.session_manager import SessionManager
 # AI SDKs
 import anthropic
 import google.generativeai as genai
@@ -40,6 +41,10 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://localhost:1234/v1")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+
+# --- Initialize Session Manager ---
+session_manager = SessionManager(redis_url=REDIS_URL)
 
 # --- 3. Unified Error Classes ---
 class FatalError(Exception):
@@ -175,16 +180,31 @@ class OrchestratorResult(BaseModel):
     response: str | None = None
     notes: str | None = None
     error_details: str | None = None
+    session_id: str | None = None
 
 @mcp.tool()
 def get_ai_response(
     prompt: str = Field(..., description="Prompt do usuário para o modelo de IA."),
     agent: Literal["claude_api", "claude_cli", "gemini_api", "gemini_cli", "ollama", "lm_studio"] = Field("claude_api", description="Agente preferido."),
-    params: Dict[str, Any] = Field({}, description="Parâmetros opcionais para o modelo de IA.")
+    params: Dict[str, Any] = Field({}, description="Parâmetros opcionais para o modelo de IA."),
+    session_id: Optional[str] = Field(None, description="ID da sessão para manter contexto.")
 ) -> OrchestratorResult:
     """
     Orquestra uma requisição para um modelo de IA com fallback inteligente.
+    Mantém contexto da sessão se session_id fornecido.
     """
+    # Create or get session
+    if not session_id:
+        session_id = session_manager.create_session()
+    
+    # Add request to conversation history
+    session_manager.add_to_conversation(session_id, {
+        "type": "user_request",
+        "prompt": prompt,
+        "agent": agent,
+        "params": params
+    })
+    
     agent_configs = {
         "claude_api": {
             "primary": call_claude_api,
@@ -220,21 +240,128 @@ def get_ai_response(
     config = agent_configs[agent]
     try:
         response_text = config["primary"](prompt, params)
-        return OrchestratorResult(status="success", agent=agent, response=response_text)
+        
+        # Add successful response to conversation history
+        session_manager.add_to_conversation(session_id, {
+            "type": "ai_response",
+            "agent": agent,
+            "response": response_text,
+            "status": "success"
+        })
+        
+        return OrchestratorResult(
+            status="success", 
+            agent=agent, 
+            response=response_text,
+            session_id=session_id
+        )
     except FallibleError as e:
         for fallback_func, fallback_name in zip(config["fallback_chain"], config["fallback_names"]):
             try:
                 response_text = fallback_func(prompt, params)
-                return OrchestratorResult(status="success", agent=fallback_name, response=response_text, notes=f"Fallback de '{agent}' para '{fallback_name}' foi acionado.")
+                
+                # Add fallback response to conversation history
+                session_manager.add_to_conversation(session_id, {
+                    "type": "ai_response",
+                    "agent": fallback_name,
+                    "response": response_text,
+                    "status": "fallback",
+                    "original_agent": agent
+                })
+                
+                return OrchestratorResult(
+                    status="success", 
+                    agent=fallback_name, 
+                    response=response_text, 
+                    notes=f"Fallback de '{agent}' para '{fallback_name}' foi acionado.",
+                    session_id=session_id
+                )
             except (FallibleError, FatalError):
                 continue
-        return OrchestratorResult(status="error", agent="none", error_details=f"Todos os agentes falharam. Erro primário: {e}")
+        
+        # Add error to conversation history
+        session_manager.add_to_conversation(session_id, {
+            "type": "error",
+            "agent": "none",
+            "error": str(e),
+            "status": "all_failed"
+        })
+        
+        return OrchestratorResult(
+            status="error", 
+            agent="none", 
+            error_details=f"Todos os agentes falharam. Erro primário: {e}",
+            session_id=session_id
+        )
     except FatalError as e:
-        return OrchestratorResult(status="error", agent=agent, error_details=f"Erro fatal: {e}")
+        # Add fatal error to conversation history
+        session_manager.add_to_conversation(session_id, {
+            "type": "error",
+            "agent": agent,
+            "error": str(e),
+            "status": "fatal"
+        })
+        
+        return OrchestratorResult(
+            status="error", 
+            agent=agent, 
+            error_details=f"Erro fatal: {e}",
+            session_id=session_id
+        )
+
+@mcp.tool()
+def create_session(
+    user_id: Optional[str] = Field(None, description="ID do usuário (opcional)"),
+    metadata: Dict[str, Any] = Field({}, description="Metadados da sessão")
+) -> Dict[str, str]:
+    """Criar nova sessão para manter contexto entre requisições."""
+    session_id = session_manager.create_session(user_id=user_id, metadata=metadata)
+    return {"session_id": session_id, "status": "created"}
+
+@mcp.tool()
+def get_session_history(
+    session_id: str = Field(..., description="ID da sessão")
+) -> Dict[str, Any]:
+    """Recuperar histórico da conversa de uma sessão."""
+    session = session_manager.get_session(session_id)
+    if not session:
+        return {"error": "Session not found"}
+    
+    return {
+        "session_id": session_id,
+        "created_at": session.created_at.isoformat(),
+        "last_accessed": session.last_accessed.isoformat(),
+        "conversation_history": session.conversation_history,
+        "metadata": session.metadata
+    }
+
+@mcp.tool()
+def delete_session(
+    session_id: str = Field(..., description="ID da sessão")
+) -> Dict[str, str]:
+    """Deletar uma sessão e seu histórico."""
+    success = session_manager.delete_session(session_id)
+    return {
+        "session_id": session_id,
+        "status": "deleted" if success else "not_found"
+    }
+
+@mcp.tool()
+def get_orchestrator_stats() -> Dict[str, Any]:
+    """Obter estatísticas do orquestrador e sessões."""
+    return {
+        "orchestrator_version": "3.1.0-stateless",
+        "session_stats": session_manager.get_session_stats(),
+        "supported_agents": [
+            "claude_api", "claude_cli", "gemini_api", 
+            "gemini_cli", "ollama", "lm_studio"
+        ]
+    }
 
 # --- 6. Execução do servidor ---
 def main():
-    log.info("Iniciando MCP Orchestrator...")
+    log.info("Iniciando MCP Orchestrator Stateless v3.1.0...")
+    log.info(f"Session Manager: {session_manager.get_session_stats()}")
     mcp.run()
 
 if __name__ == "__main__":
