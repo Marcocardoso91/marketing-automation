@@ -7,7 +7,7 @@
 Os projetos **facebook-ads-ai-agent** e **Agente Facebook** foram integrados com sucesso em uma plataforma unificada.
 
 ```
-├── api/         # facebook-ads-ai-agent (Agent API)
+├── backend/     # facebook-ads-ai-agent (Agent API)
 ├── analytics/   # Agente Facebook (Analytics)
 └── shared/      # Código compartilhado ✨ NOVO
 ```
@@ -38,22 +38,22 @@ docker-compose -f docker-compose.integrated.yml up -d
 ### Você quer...
 
 **Começar agora?**  
-→ [QUICK-START.md](QUICK-START.md) (15 minutos)
+→ [docs/development/QUICK-START.md](docs/development/QUICK-START.md) (15 minutos)
 
 **Entender o que foi feito?**  
-→ [✅-INTEGRAÇÃO-COMPLETA.md](✅-INTEGRAÇÃO-COMPLETA.md)
+→ [docs/archive/✅-INTEGRAÇÃO-COMPLETA.md](docs/archive/✅-INTEGRAÇÃO-COMPLETA.md)
 
 **Ver como funciona?**  
-→ [docs/INTEGRATION-GUIDE.md](docs/INTEGRATION-GUIDE.md)
+→ [docs/operations/INTEGRATION-GUIDE.md](docs/operations/INTEGRATION-GUIDE.md)
 
 **Migrar dos projetos antigos?**  
-→ [MIGRATION.md](MIGRATION.md)
+→ [docs/archive/MIGRATION.md](docs/archive/MIGRATION.md)
 
 **Validar a instalação?**  
-→ [VALIDATION-CHECKLIST.md](VALIDATION-CHECKLIST.md)
+→ [docs/archive/VALIDATION-CHECKLIST.md](docs/archive/VALIDATION-CHECKLIST.md)
 
 **Navegar toda documentação?**  
-→ [INDEX.md](INDEX.md)
+→ [docs/INDEX.md](docs/INDEX.md)
 
 ---
 
@@ -114,9 +114,9 @@ python scripts\validate-integration.py
 
 ## 🆘 PROBLEMAS?
 
-1. **Leia:** [QUICK-START.md](QUICK-START.md) seção "Problemas Comuns"
+1. **Leia:** [docs/development/QUICK-START.md](docs/development/QUICK-START.md) seção "Problemas Comuns"
 2. **Execute:** `.\scripts\health-check.ps1`
-3. **Consulte:** [docs/INTEGRATION-GUIDE.md](docs/INTEGRATION-GUIDE.md) - Troubleshooting
+3. **Consulte:** [docs/operations/INTEGRATION-GUIDE.md](docs/operations/INTEGRATION-GUIDE.md) - Troubleshooting
 
 ---
 
@@ -125,7 +125,7 @@ python scripts\validate-integration.py
 | Arquivo | Para que serve |
 |---------|----------------|
 | `README.md` | Documentação principal |
-| `QUICK-START.md` | Início rápido |
+| `docs/development/QUICK-START.md` | Início rápido |
 | `env.template` | Template de configuração |
 | `docker-compose.integrated.yml` | Stack completo |
 | `scripts/setup.ps1` | Setup automatizado |
@@ -147,5 +147,5 @@ python scripts\validate-integration.py
 
 ---
 
-**Próxima ação:** Leia [QUICK-START.md](QUICK-START.md) e execute o setup! 🚀
+**Próxima ação:** Leia [docs/development/QUICK-START.md](docs/development/QUICK-START.md) e execute o setup! 🚀
 

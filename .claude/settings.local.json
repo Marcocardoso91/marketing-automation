@@ -8,7 +8,9 @@
       "Bash(git add Macspark/marketing-automation/.claude/settings.local.json)",
       "Bash(git commit -m \"chore(marketing-automation): atualizar configurações locais Claude\n\nAtualização de settings locais do Claude Code para o projeto.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\")",
       "Bash(git push origin main --dry-run)",
-      "Bash(git push -u origin main)"
+      "Bash(git push -u origin main)",
+      "Bash(cat \"c:\\Users\\marco\\Macspark\\marketing-automation\\README.md\")",
+      "Bash(tree -L 2 \"c:\\Users\\marco\\Macspark\\marketing-automation\\api\\src\" -I \"__pycache__\")"
     ],
     "deny": [],
     "ask": []

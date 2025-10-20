@@ -25,12 +25,12 @@
 
 | Diretório  | Descrição | Status atual |
 |------------|-----------|--------------|
-| `api/`     | FastAPI + Celery para orquestrar Facebook Ads, chat IA e exportação de métricas. | ✅ Produção (rotinas core) |
-| `analytics/` | Scripts e workflows n8n para coleta multi‑fonte. Parte do conteúdo descreve planos/roadmap. | ⚠️ Parcial (ver docs específicas) |
+| `backend/`     | FastAPI + Celery para orquestrar Facebook Ads, chat IA e exportação de métricas. | ✅ Produção (rotinas core) |
+| `analytics/` | Scripts e workflows n8n para coleta multi‑fonte. Dashboards BI com Apache Superset. | ✅ Operacional |
 | `shared/`  | Pacote Python com schemas Pydantic e utilitários reutilizáveis. | ✅ |
-| `docs/`    | Documentação integrada (arquitetura, PRDs, guias). | ✅ |
-| `api/docs/MCP-INTEGRATION.md` | Guia para conectar agentes via MCP (n8n/Notion) usando servidores externos. | ✅ Documentação |
-| `docs/DEPENDENCIES.md` | Visão consolidada dos `requirements` e pacotes. | ✅ |
+| `docs/`    | Documentação organizada por categoria (architecture, product, development, operations). | ✅ |
+| `infrastructure/` | Configurações Docker, monitoring (Prometheus) e CI/CD. | ✅ |
+| `frontend/` | Placeholder para interface web futura (atualmente usa Swagger + Superset). | 📋 Planejado |
 
 > ℹ️ Servidores MCP não residem neste repositório. Use o projeto `mcp_orchestrator` (Node/TypeScript) ou os servidores comunitários mencionados no guia de MCP para expor ferramentas a agentes externos.
 
@@ -38,11 +38,13 @@
 
 ```
 marketing-automation/
-├── api/        -> FastAPI (Agent API) + Celery
-├── analytics/  -> Scripts/workflows (conceito e execuções)
-├── shared/     -> Pacote Python (schemas/utilitários)
-├── docs/       -> Documentação central
-└── tests/      -> Testes de integração
+├── backend/          -> FastAPI (Agent API) + Celery
+├── analytics/        -> Data pipelines + BI (Superset)
+├── shared/           -> Pacote Python (schemas/utilitários)
+├── frontend/         -> Interface web (futuro)
+├── infrastructure/   -> Docker, monitoring, CI/CD
+├── docs/             -> Documentação organizada
+└── tests/            -> Testes de integração
 ```
 
 ## Quick Start

@@ -1,5 +1,41 @@
 # Changelog - Marketing Automation Platform
 
+## [1.1.0] - 2025-10-20
+
+### Changed - Reorganização de Estrutura
+
+#### Estrutura de Pastas
+- ✅ Renomeado `api/` → `backend/` (convenção monorepo)
+- ✅ Criado `infrastructure/` para configs centralizadas
+- ✅ Criado `frontend/` como placeholder
+- ✅ Reorganizado `docs/` por categorias:
+  - `docs/architecture/` - Arquitetura e ADRs
+  - `docs/product/` - PRDs e backlog
+  - `docs/development/` - Guias de desenvolvimento
+  - `docs/operations/` - Deploy e operações
+  - `docs/decisions/` - Decisões técnicas
+  - `docs/archive/` - Relatórios históricos
+
+#### Infraestrutura
+- ✅ Movido `monitoring/prometheus.yml` → `infrastructure/monitoring/`
+- ✅ Copiado `backend/Dockerfile` → `infrastructure/docker/backend.Dockerfile`
+- ✅ Atualizado `docker-compose.integrated.yml` com novos paths
+
+#### Documentação
+- ✅ Atualizado README.md com nova estrutura
+- ✅ Criado `docs/INDEX.md` navegável
+- ✅ Criado `frontend/README.md` com planejamento
+- ✅ Movidos relatórios históricos para `docs/archive/`
+- ✅ Atualizado `👉-COMECE-AQUI.md` com novos paths
+- ✅ Movido `RESUMO-FINAL.txt` → `docs/archive/RESUMO-INTEGRACAO-v1.0.0.txt`
+- ✅ Movido `test_facebook.py` → `scripts/test-facebook.py`
+
+#### Benefícios
+- Estrutura mais clara e profissional
+- Melhor navegação da documentação
+- Preparado para expansão (frontend)
+- Alinhado com best practices monorepo Python/FastAPI
+
 ## [1.0.0] - 2025-10-18
 
 ### Added - Integração Completa
