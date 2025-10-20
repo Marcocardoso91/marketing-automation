@@ -1,0 +1,5 @@
+﻿"Nome da campanha","Nome do conjunto de anúncios","Nome do anúncio",Alcance,Impressões,Frequência,"Valor usado (BRL)","Tipo de resultado","Custo por resultado","CPM (custo por 1.000 impressões)","CTR (todos)","CPC (todos)","Início dos relatórios","Término dos relatórios"
+Aquecimento_Engajamento_01,INT_Engajamento_18-44_BR_Automático,"AD 04",32,32,1,0,"Engajamentos com o post",0,0,3.125,0,2025-10-01,2025-10-18
+Aquecimento_Engajamento_01,INT_Engajamento_18-44_BR_Automático,"AD 01",12613,12613,1,25.86,"Engajamentos com o post",0.00225773,2.0502656,0.71354951,0.28733333,2025-10-01,2025-10-18
+Aquecimento_Engajamento_01,INT_Engajamento_18-44_BR_Automático,"AD 03",28062,28062,1,56.74,"Engajamentos com o post",0.00274876,2.02195139,0.28508303,0.70925,2025-10-01,2025-10-18
+Aquecimento_Engajamento_01,INT_Engajamento_18-44_BR_Automático,"AD 02",488,495,1.01434426,1.09,"Engajamentos com o post",0.00265854,2.2020202,0.80808081,0.2725,2025-10-01,2025-10-18
