@@ -1,0 +1,173 @@
+{
+  "name": "Google Analytics → Supabase - Métricas Diárias",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger - Diário 9h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "id": "schedule-ga-trigger"
+    },
+    {
+      "parameters": {
+        "resource": "report",
+        "operation": "get",
+        "viewId": "={{$env.GA4_PROPERTY_ID}}",
+        "startDate": "yesterday",
+        "endDate": "yesterday",
+        "metrics": [
+          "sessions",
+          "users",
+          "newUsers",
+          "bounceRate",
+          "pageviewsPerSession",
+          "avgSessionDuration"
+        ],
+        "dimensions": [],
+        "additionalFields": {}
+      },
+      "name": "Google Analytics 4 - Buscar Métricas",
+      "type": "n8n-nodes-base.googleAnalytics",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "id": "google-analytics-node",
+      "credentials": {
+        "googleAnalyticsOAuth2": "Google Analytics"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar dados do Google Analytics\nconst gaData = items[0].json;\n\n// Extrair métricas\nconst sessions = parseInt(gaData.sessions || 0);\nconst users = parseInt(gaData.users || 0);\nconst newUsers = parseInt(gaData.newUsers || 0);\nconst bounceRate = parseFloat(gaData.bounceRate || 0);\nconst avgSessionDuration = parseInt(gaData.avgSessionDuration || 0);\n\n// Preparar para Supabase\nconst yesterday = new Date();\nyesterday.setDate(yesterday.getDate() - 1);\nconst dataFormatted = yesterday.toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    data: dataFormatted,\n    source: 'google_analytics',\n    \n    // Métricas GA4\n    sessions: sessions,\n    users: users,\n    bounce_rate: bounceRate,\n    \n    // Métricas padrão (zero para GA)\n    spend: 0,\n    reach: users,\n    impressions: sessions,\n    clicks: 0,\n    ctr: 0,\n    cpc: 0,\n    cpe: 0,\n    cpm: 0,\n    conversions: newUsers,\n    new_followers: 0,\n    \n    // Metadata\n    notes: `GA4: ${sessions} sessões, ${users} usuários, ${bounceRate.toFixed(2)}% bounce rate`,\n    raw_data: gaData\n  }\n}];"
+      },
+      "name": "Process GA4 Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "id": "code-process-ga"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/daily_metrics",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.SUPABASE_ANON_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer ={{$env.SUPABASE_SERVICE_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "name": "Supabase - Insert Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 300],
+      "id": "supabase-insert"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "number": [],
+          "string": []
+        }
+      },
+      "name": "Success",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "id": "success-node"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger - Diário 9h": {
+      "main": [
+        [
+          {
+            "node": "Google Analytics 4 - Buscar Métricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Analytics 4 - Buscar Métricas": {
+      "main": [
+        [
+          {
+            "node": "Process GA4 Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process GA4 Data": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Insert Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Insert Metrics": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0.0",
+  "tags": [
+    {
+      "name": "marketing",
+      "id": "marketing-tag"
+    },
+    {
+      "name": "google-analytics",
+      "id": "ga-tag"
+    }
+  ]
+}
+

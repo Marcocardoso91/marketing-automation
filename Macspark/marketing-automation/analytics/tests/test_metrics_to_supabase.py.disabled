@@ -1,0 +1,314 @@
+"""
+Testes para o script metrics-to-supabase.py
+"""
+import importlib.util
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+from datetime import datetime, timedelta
+import sys
+import os
+
+# Adicionar o diretório scripts ao path para importar
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
+
+
+# Import metrics_to_supabase module
+spec = importlib.util.spec_from_file_location(
+    "metrics_to_supabase", "scripts/metrics-to-supabase.py")
+metrics_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(metrics_module)
+
+# Import functions
+get_meta_ads_metrics = metrics_module.get_meta_ads_metrics
+get_youtube_metrics = metrics_module.get_youtube_metrics
+get_google_analytics_metrics = metrics_module.get_google_analytics_metrics
+get_google_ads_metrics = metrics_module.get_google_ads_metrics
+process_meta_ads = metrics_module.process_meta_ads
+process_youtube = metrics_module.process_youtube
+save_to_supabase = metrics_module.save_to_supabase
+consolidate_metrics = metrics_module.consolidate_metrics
+generate_insights_openai = metrics_module.generate_insights_openai
+send_slack_notification = metrics_module.send_slack_notification
+main = metrics_module.main
+
+
+class TestMetaAdsIntegration:
+    """Testes para integração Meta Ads API"""
+
+    @patch('requests.get')
+    def test_get_meta_ads_metrics_success(self, mock_get):
+        """Testa coleta bem-sucedida de métricas do Meta Ads"""
+        # Mock da resposta da API
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'data': [
+                {
+                    'campaign_name': 'Test Campaign',
+                    'spend': '100.50',
+                    'impressions': '10000',
+                    'reach': '8000',
+                    'clicks': '150',
+                    'ctr': '1.5',
+                    'cpc': '0.67',
+                    'frequency': '1.25',
+                    'actions': [
+                        {'action_type': 'follow', 'value': '50'}
+                    ]
+                }
+            ]
+        }
+        mock_get.return_value = mock_response
+
+        # Executar
+        result = get_meta_ads_metrics(date_preset='yesterday')
+
+        # Assertions
+        assert result is not None
+        assert len(result) == 1
+        assert result[0]['campaign_name'] == 'Test Campaign'
+        assert float(result[0]['spend']) == 100.50
+
+    @patch('requests.get')
+    def test_get_meta_ads_metrics_api_error(self, mock_get):
+        """Testa tratamento de erro da API"""
+        mock_response = Mock()
+        mock_response.status_code = 400
+        mock_get.return_value = mock_response
+
+        result = get_meta_ads_metrics()
+
+        assert result is None
+
+    def test_process_meta_ads_calculates_correctly(self):
+        """Testa cálculos de métricas agregadas"""
+        campaigns_data = [
+            {
+                'spend': '100',
+                'impressions': '10000',
+                'reach': '8000',
+                'clicks': '150',
+                'frequency': '1.25',
+                'actions': [{'action_type': 'follow', 'value': '50'}]
+            }
+        ]
+
+        result = process_meta_ads(campaigns_data)
+
+        assert result is not None
+        assert result['spend'] == 100.0
+        assert result['impressions'] == 10000
+        assert result['new_followers'] == 50
+        assert result['cost_per_follower'] == 2.0  # 100 / 50
+        assert result['ctr'] == 1.5  # (150/10000)*100
+
+    def test_process_meta_ads_empty_data(self):
+        """Testa processamento com dados vazios"""
+        result = process_meta_ads([])
+        assert result is None
+
+    @patch('requests.get')
+    def test_get_meta_ads_metrics_credentials_missing(self, mock_get):
+        """Testa quando credenciais não estão configuradas"""
+        with patch.dict(os.environ, {'META_ACCESS_TOKEN': '', 'META_AD_ACCOUNT_ID': ''}):
+            result = get_meta_ads_metrics()
+            assert result is None
+
+
+class TestYouTubeIntegration:
+    """Testes para YouTube Data API"""
+
+    @patch('requests.get')
+    def test_get_youtube_metrics_success(self, mock_get):
+        """Testa coleta de métricas do YouTube"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'items': [{
+                'statistics': {
+                    'viewCount': '100000',
+                    'subscriberCount': '5000'
+                }
+            }]
+        }
+        mock_get.return_value = mock_response
+
+        result = get_youtube_metrics()
+
+        assert result is not None
+        assert int(result['viewCount']) == 100000
+        assert int(result['subscriberCount']) == 5000
+
+    @patch('requests.get')
+    def test_get_youtube_metrics_api_error(self, mock_get):
+        """Testa erro na API do YouTube"""
+        mock_response = Mock()
+        mock_response.status_code = 403
+        mock_get.return_value = mock_response
+
+        result = get_youtube_metrics()
+
+        assert result is None
+
+    def test_process_youtube_calculates_correctly(self, sample_youtube_data):
+        """Testa processamento de dados do YouTube"""
+        result = process_youtube(sample_youtube_data)
+
+        assert result is not None
+        assert result['source'] == 'youtube'
+        assert result['views'] > 0  # Estimativa baseada no total
+        assert result['subscribers_gained'] > 0  # Estimativa baseada no total
+
+
+class TestGoogleAnalyticsIntegration:
+    """Testes para Google Analytics 4"""
+
+    def test_get_google_analytics_metrics_placeholder(self):
+        """Testa função placeholder do GA4"""
+        result = get_google_analytics_metrics()
+        assert result is None
+
+
+class TestGoogleAdsIntegration:
+    """Testes para Google Ads API"""
+
+    def test_get_google_ads_metrics_placeholder(self):
+        """Testa função placeholder do Google Ads"""
+        result = get_google_ads_metrics()
+        assert result is None
+
+
+class TestSupabaseIntegration:
+    """Testes para persistência Supabase"""
+
+    def test_save_to_supabase_no_client(self, monkeypatch):
+        """Testa quando cliente Supabase não está configurado"""
+        monkeypatch.setattr(metrics_module, 'supabase', None)
+        
+        metrics = {'data': '2025-10-18', 'source': 'test'}
+
+        result = save_to_supabase(metrics)
+
+        assert result is False
+    
+    def test_consolidate_metrics_no_client(self, monkeypatch):
+        """Testa consolidação quando cliente não está configurado"""
+        monkeypatch.setattr(metrics_module, 'supabase', None)
+        
+        result = consolidate_metrics('2025-10-18')
+        
+        assert result is None
+
+
+class TestOpenAIIntegration:
+    """Testes para geração de insights com OpenAI"""
+
+    @patch('openai_client')
+    def test_generate_insights_openai_success(self, mock_openai):
+        """Testa geração de insights com IA"""
+        mock_response = Mock()
+        mock_response.choices = [
+            Mock(message=Mock(content='Análise: Performance positiva'))
+        ]
+        mock_openai.chat.completions.create.return_value = mock_response
+
+        consolidated = {
+            'data': '2025-10-18',
+            'total_spend': 100.0,
+            'total_followers': 50,
+            'avg_cost_per_follower': 2.0,
+            'avg_ctr': 1.5,
+            'by_source': {}
+        }
+
+        result = generate_insights_openai(consolidated)
+
+        assert 'Análise' in result
+        assert 'Performance' in result
+
+    @patch('metrics_to_supabase.openai_client', None)
+    def test_generate_insights_openai_no_client(self):
+        """Testa quando cliente OpenAI não está configurado"""
+        consolidated = {'data': '2025-10-18'}
+
+        result = generate_insights_openai(consolidated)
+
+        assert result == "⚠️ OpenAI não configurado"
+
+    @patch('openai_client')
+    def test_generate_insights_openai_error(self, mock_openai):
+        """Testa erro na API do OpenAI"""
+        mock_openai.chat.completions.create.side_effect = Exception(
+            "API Error")
+
+        consolidated = {'data': '2025-10-18'}
+
+        result = generate_insights_openai(consolidated)
+
+        assert 'Erro ao gerar insights' in result
+
+
+class TestSlackIntegration:
+    """Testes para notificações Slack"""
+
+    @patch('metrics_to_supabase.requests.post')
+    def test_send_slack_notification_success(self, mock_post):
+        """Testa envio bem-sucedido de notificação Slack"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_post.return_value = mock_response
+
+        consolidated = {
+            'data': '2025-10-18',
+            'total_spend': 100.0,
+            'total_reach': 1000,
+            'total_followers': 50,
+            'avg_cost_per_follower': 2.0
+        }
+        ai_insight = "Test insight"
+
+        result = send_slack_notification(consolidated, ai_insight)
+
+        assert result is True
+        mock_post.assert_called_once()
+
+    @patch('metrics_to_supabase.requests.post')
+    def test_send_slack_notification_webhook_missing(self, mock_post):
+        """Testa quando webhook Slack não está configurado"""
+        with patch.dict(os.environ, {'SLACK_WEBHOOK_URL': ''}):
+            consolidated = {'data': '2025-10-18'}
+            result = send_slack_notification(consolidated, "test")
+
+            assert result is False
+            mock_post.assert_not_called()
+
+    @patch('metrics_to_supabase.requests.post')
+    def test_send_slack_notification_api_error(self, mock_post):
+        """Testa erro na API do Slack"""
+        mock_response = Mock()
+        mock_response.status_code = 400
+        mock_post.return_value = mock_response
+
+        consolidated = {'data': '2025-10-18'}
+
+        result = send_slack_notification(consolidated, "test")
+
+        assert result is False
+
+
+class TestMainWorkflow:
+    """Testes para função main"""
+
+    @patch('supabase')
+    @patch('metrics_to_supabase.get_meta_ads_metrics')
+    @patch('metrics_to_supabase.get_youtube_metrics')
+    def test_main_with_supabase(self, mock_youtube, mock_meta, mock_supabase):
+        """Testa execução da função main com Supabase configurado"""
+        mock_meta.return_value = [{'campaign_name': 'Test', 'spend': '100'}]
+        mock_youtube.return_value = {'viewCount': '1000'}
+
+        # Não deve levantar exceção
+        try:
+            main()
+        except SystemExit:
+            pass  # main() chama exit() quando não há Supabase

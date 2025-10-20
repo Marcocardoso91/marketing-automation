@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh marcocardoso@217.196.62.130 \"docker exec postgres-prd psql -U postgres -d facebook_ads_marketing -c ''SELECT COUNT(*) as tabelas FROM information_schema.tables WHERE table_schema=''\\''''public''\\'''';''\")",
+      "Bash(git rev-parse --show-toplevel)",
+      "Bash(git add Macspark/marketing-automation/)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

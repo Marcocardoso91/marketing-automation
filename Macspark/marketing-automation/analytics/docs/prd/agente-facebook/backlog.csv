@@ -1,0 +1,65 @@
+Prioridade,ID,Descrição,Critério de Aceitação,Status,Sprint,Fonte,Responsável,Estimativa
+P0,RF-001,Conectar API Meta Ads e extrair métricas de campanhas,Fluxo retorna métricas válidas (spend reach CTR CPC CPE frequency),✅ Implementado,Sprint 1,n8n-workflows/meta-ads-notion.json,Equipe n8n,5h
+P1,RF-002,Atualizar automaticamente páginas e dashboards do Notion,Dashboard atualizado em tempo real sem erro,✅ Implementado,Sprint 1,scripts/meta-to-notion.py,Equipe n8n,8h
+P2,RF-003,Enviar alertas de performance via n8n,Alertas disparados sem erro (meta atingida queda erro),📅 Planejado,Sprint 3,n8n alerting node,Equipe n8n,3h
+P1,RF-004,Coletar e processar screenshots do Instagram Insights,Screenshots capturadas e dados extraídos com precisão,✅ Implementado,Sprint 1,docs/screenshots-guide.md,Sabrina,2h
+P2,RF-005,Gerar relatórios semanais de crescimento e comparação,Relatórios automáticos com comparação baseline,✅ Implementado,Sprint 2,Notion Pages,Analistas,4h
+P0,RF-006,Rastrear métricas diárias (CTR CPC CPE Frequência),Métricas coletadas e persistidas diariamente,✅ Implementado,Sprint 1,Notion Database,Equipe n8n,3h
+P1,RF-007,Calcular automaticamente custo por seguidor e ROI,Cálculos corretos validados contra dados manuais,✅ Implementado,Sprint 1,scripts/meta-to-notion.py:98,Equipe n8n,2h
+P1,RF-008,Armazenar linha de base (baseline) para comparações,Baseline capturada e imutável com data de referência,✅ Implementado,Sprint 2,Notion - Linha de Base,Sabrina,1h
+P2,RF-009,Manter calendário de conteúdo integrado com ads,Calendário sincronizado com campanhas ativas,✅ Implementado,Sprint 2,Notion - Calendário,Sabrina,4h
+P2,RF-010,Banco de ideias criativas e templates,Banco com 15+ ideias e 10+ templates prontos,✅ Implementado,Sprint 2,Notion - Banco de Ideias,Sabrina,3h
+P0,RNF-001,Segurança de tokens via Docker Secrets ou .env,Tokens nunca expostos em código versionado,✅ Implementado,Sprint 1,scripts/env.example.txt,Equipe n8n,1h
+P1,RNF-002,Logs detalhados para auditoria e troubleshooting,15+ eventos logados por execução com timestamp,✅ Implementado,Sprint 1,scripts/meta-to-notion.py:190-234,Equipe n8n,2h
+P2,RNF-003,Tempo de atualização máximo de 10 minutos por ciclo,Tempo medido <10min em 95% das execuções,✅ Validado,Sprint 1,n8n workflow logs,Equipe n8n,1h
+P1,RNF-004,Disponibilidade 99%+ com monitoramento Portainer,Uptime >99% medido por 30 dias consecutivos,✅ Implementado,Sprint 1,VPS + Portainer,Equipe n8n,2h
+P2,RNF-005,Backup automático de dados críticos,Snapshots diários + teste de restauração bem-sucedido,✅ Implementado,Sprint 1,Docker Snapshots + cron,Equipe n8n,2h
+P1,RNF-006,Documentação completa e bilíngue (PT-BR + EN-US),PRD completo em ambos idiomas com mesma estrutura,✅ Implementado,Sprint 2,PRD.pt-BR.md + PRD.en-US.md,Agente Orquestrador,12h
+P1,RNF-007,Rastreabilidade entre requisitos código e fontes,Cada RF/RNF linkado a arquivo específico,✅ Implementado,Sprint 2,inventory.json + coerencia.md,Agente Orquestrador,4h
+P2,FEAT-001,Otimizar perfil Instagram para conversão,Bio otimizada grid coeso highlights organizados,🔵 Em andamento,Sprint 2,Análise do Plano de Crescimento,Sabrina,3h
+P2,FEAT-002,Implementar frequency cap estratégico (2 imp/7d),Frequency cap ativo e validado no Meta Ads,📅 Planejado,Sprint 2,Meta Ads Manager config,Sabrina,1h
+P0,BACK-045,Integração Google Analytics 4,Métricas web coletadas automaticamente via GA4 API,✅ Implementado,Sprint 3,n8n-workflows/google-analytics-supabase.json,Equipe n8n,8h
+P0,BACK-046,Integração Google Ads API,Métricas de campanhas Google coletadas automaticamente,✅ Implementado,Sprint 3,n8n-workflows/google-ads-supabase.json,Equipe n8n,8h
+P1,BACK-047,Integração YouTube Data API,Métricas de vídeos coletadas automaticamente,✅ Implementado,Sprint 3,n8n-workflows/youtube-supabase.json,Equipe n8n,4h
+P0,BACK-048,Data Warehouse Supabase PostgreSQL,Setup completo com schema e tabelas funcionais,✅ Implementado,Sprint 3,Supabase setup + SQL schema,Equipe n8n,4h
+P0,BACK-049,Insights automáticos com OpenAI,Análises geradas automaticamente via GPT-4o-mini,✅ Implementado,Sprint 3,OpenAI integration,Equipe n8n,6h
+P1,BACK-050,Notificações Slack,Alertas e relatórios enviados automaticamente,✅ Implementado,Sprint 3,Slack webhook integration,Equipe n8n,3h
+P1,BACK-051,Setup Apache Superset,Visualização avançada configurada e funcional,✅ Implementado,Sprint 3,Docker Compose + superset_config.py,Equipe n8n,6h
+P0,BACK-052,Configurar Google APIs,Configurar OAuth2 e tokens para GA4/Ads/YouTube,📅 Todo,Sprint 4,Google Cloud Console,Equipe n8n,2h
+P0,BACK-053,Criar Testes Unitários,Implementar testes com pytest e coverage >=70%,📅 Todo,Sprint 4,tests/test_*.py,Equipe n8n,8h
+P1,BACK-054,Setup CI/CD,GitHub Actions pipeline funcional,📅 Todo,Sprint 4,.github/workflows/ci.yml,Equipe n8n,4h
+P1,BACK-055,Adicionar Type Hints,Type hints completos em todos os scripts Python,📅 Todo,Sprint 4,scripts/*.py,Equipe n8n,4h
+P2,BACK-056,Refatoração de Código,Refatorar funções longas e melhorar legibilidade,📅 Todo,Sprint 5,scripts/*.py,Equipe n8n,6h
+P2,BACK-057,Setup de Monitoramento,Prometheus + Grafana para métricas de sistema,📅 Todo,Sprint 5,Docker monitoring stack,Equipe n8n,8h
+P1,BACK-058,Atualizar PRD EN,Atualizar PRD inglês para v3.0.0,📅 Todo,Sprint 4,docs/prd/agente-facebook/PRD.en-US.md,Equipe n8n,2h
+P2,BACK-059,Atualizar Glossário,Adicionar 15 termos novos ao glossário,📅 Todo,Sprint 5,docs/prd/agente-facebook/glossario.md,Equipe n8n,1h
+P2,BACK-060,Integração LinkedIn Ads,Adicionar LinkedIn como fonte de dados,📅 Backlog,Sprint 6,LinkedIn Marketing API,Equipe n8n,8h
+P2,BACK-061,Integração TikTok Ads,Adicionar TikTok como fonte de dados,📅 Backlog,Sprint 6,TikTok Business API,Equipe n8n,8h
+P2,BACK-062,Predições com ML,Implementar previsões de performance com ML,📅 Backlog,Sprint 7,TensorFlow/PyTorch,Equipe n8n,16h
+P3,BACK-063,Integração WhatsApp,Integrar WhatsApp Business API,📅 Backlog,Sprint 8,WhatsApp Business API,Equipe n8n,12h
+P2,BACK-064,Otimização de Performance,Otimizar queries e implementar caching,📅 Backlog,Sprint 7,Redis + query optimization,Equipe n8n,8h
+P2,FEAT-003,Estratégia de conteúdo orgânico sinérgico,1-2 Stories/dia 1 Reel/2d 1 carrossel/semana,🔵 Em andamento,Sprint 2,Notion Calendário,Sabrina,5h
+P3,FEAT-004,Hooks otimizados nos Reels (primeiros 3 seg),5+ variações de hooks testadas com CTR >1.5%,📅 Planejado,Sprint 3,Templates de Posts,Sabrina,4h
+P3,FEAT-005,Sistema de teste criativo estruturado (A/B),3+ testes A/B executados com metodologia validada,📅 Planejado,Sprint 3,Notion + Meta Ads,Sabrina,6h
+P3,FEAT-006,Implementar creative rotation system,Banco com 5-7 criativos + rotação automática,📅 Planejado,Sprint 3,Notion Banco de Ideias,Sabrina,5h
+P3,FEAT-007,Estratégia de engajamento via Instagram DM,DM automation ativa + resposta <2h,📅 Planejado,Sprint 3,ManyChat ou ReplyRush,Sabrina,4h
+P2,FEAT-008,Protocolo de escalonamento 20% (safe scaling),Budget aumentado 20% sem reset learning phase,📅 Planejado,Sprint 4,Meta Ads Manager,Sabrina,2h
+P2,FEAT-009,Lookalike Audiences (1% e 3%),Lookalike criado com source >1000 pessoas + testado,📅 Planejado,Sprint 4,Meta Ads Manager,Sabrina,3h
+P2,FEAT-010,Estrutura CBO vs ABO para scaling,Migração para CBO após identificar vencedor,📅 Planejado,Sprint 4,Meta Ads Manager,Sabrina,2h
+P3,FEAT-011,Dashboard de métricas críticas (diário),Dashboard com métricas primárias + alertas visuais,📅 Planejado,Sprint 3,Notion Dashboard,Analistas,4h
+P3,FEAT-012,Análise de sentimento e qualidade de seguidores,Report semanal com %BR %público-alvo engagement,📅 Planejado,Sprint 3,Instagram Insights + análise,Analistas,5h
+P3,FEAT-013,Formatos de conteúdo otimizados para beleza,5 formatos testados com engagement >1.5%,📅 Planejado,Sprint 3,Notion Templates,Sabrina,6h
+P3,FEAT-014,Calendário de conteúdo sazonal,Calendário 4 semanas com datas/temas relevantes,✅ Implementado,Sprint 2,Notion Calendário,Sabrina,3h
+P4,FEAT-015,Checklist anti-erro (pre-publicação),Checklist com 15+ itens validados antes de campanha,✅ Implementado,Sprint 2,Análise do Plano,Sabrina,2h
+P4,BUG-001,Corrigir dados de Instagram (1.142 vs 16.130),Dados corretos no Notion com Instagram real,✅ Resolvido,Sprint 2,Correção 18 Out,Agente Orquestrador,1h
+P4,BUG-002,Atualizar follower count baseline,Baseline atualizado: 16.130 (mudança -5),✅ Resolvido,Sprint 2,Correção 18 Out,Agente Orquestrador,0.5h
+P1,DOC-001,Criar PRD completo PT-BR com rastreabilidade,PRD com inventory ADRs requisitos fontes,✅ Implementado,Sprint 2,PRD.pt-BR.md,Agente Orquestrador,6h
+P1,DOC-002,Criar PRD completo EN-US (tradução),PRD EN-US com mesma estrutura que PT-BR,✅ Implementado,Sprint 2,PRD.en-US.md,Agente Orquestrador,4h
+P1,DOC-003,Gerar inventory.json completo,Inventário com arquivos dependências métricas,✅ Implementado,Sprint 2,inventory.json,Agente Orquestrador,3h
+P2,DOC-004,Criar decisions.md com ADRs,5+ decisões arquiteturais documentadas,📅 Planejado,Sprint 2,decisions.md,Agente Orquestrador,2h
+P2,DOC-005,Gerar coerencia.md (matriz rastreabilidade),Matriz com RF/RNF vs fontes + validação,📅 Planejado,Sprint 2,coerencia.md,Agente Orquestrador,3h
+P2,DOC-006,Criar glossario.md com termos técnicos,30+ termos definidos (PT+EN),📅 Planejado,Sprint 2,glossario.md,Agente Orquestrador,2h
+P2,DOC-007,Gerar system-map.md (diagrama arquitetura),Diagrama mermaid com integrações completas,📅 Planejado,Sprint 2,system-map.md,Agente Orquestrador,2h
+P3,DOC-008,Atualizar context.md com histórico completo,Context com decisões stakeholders restrições,📅 Planejado,Sprint 2,context.md,Agente Orquestrador,2h
+P3,DOC-009,Criar audit-log.md com score coerência,Log com validação + score 0-100,📅 Planejado,Sprint 2,audit-log.md,Agente Orquestrador,2h
+P3,DOC-010,Gerar decisions-history.md,Histórico cronológico de decisões técnicas,📅 Planejado,Sprint 2,decisions-history.md,Agente Orquestrador,2h

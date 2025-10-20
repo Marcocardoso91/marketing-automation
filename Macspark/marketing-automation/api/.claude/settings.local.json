@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls -lh)",
+      "Bash(python -m pip list)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(python -m pytest tests/ --cov=src --cov-report=term-missing)",
+      "Bash(python -m bandit -r src/ -f json)",
+      "Bash(python -c \"import sys, json; d=json.load(sys.stdin); print(f''''Severidade ALTA: {len([x for x in d[\"\"results\"\"] if x[\"\"issue_severity\"\"]==\"\"HIGH\"\"])}\\nSeveridade MÉDIA: {len([x for x in d[\"\"results\"\"] if x[\"\"issue_severity\"\"]==\"\"MEDIUM\"\"])}\\nSeveridade BAIXA: {len([x for x in d[\"\"results\"\"] if x[\"\"issue_severity\"\"]==\"\"LOW\"\"])}\\nTotal: {len(d[\"\"results\"\"])}'''')\")",
+      "Bash(python -m bandit -r src/ -ll)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

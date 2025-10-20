@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile \"scripts/metrics-to-supabase.py\")",
+      "Bash(python -c \"import json; print(''✅ JSON module disponível'')\")",
+      "Bash(python -c \"import requests; print(''✅ Requests instalado'')\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

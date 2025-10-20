@@ -1,0 +1,101 @@
+{
+  "name": "Facebook Fetch Metrics",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "fb_fetch_metrics",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v18.0/{{ $json.account_id }}/campaigns",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "options": {
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "fields",
+                "value": "id,name,status,objective,insights{impressions,clicks,spend,ctr,cpc,cpm}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "facebook-api-call",
+      "name": "Facebook API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform Facebook data to our format\nconst campaigns = $input.all()[0].json.data;\nconst transformed = [];\n\nfor (const campaign of campaigns) {\n  const insights = campaign.insights?.data?.[0] || {};\n  \n  transformed.push({\n    campaign_id: campaign.id,\n    campaign_name: campaign.name,\n    status: campaign.status,\n    impressions: insights.impressions || 0,\n    clicks: insights.clicks || 0,\n    spend: parseFloat(insights.spend || 0),\n    ctr: parseFloat(insights.ctr || 0),\n    cpc: parseFloat(insights.cpc || 0),\n    cpm: parseFloat(insights.cpm || 0)\n  });\n}\n\nreturn transformed;"
+      },
+      "id": "transform-data",
+      "name": "Transform Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://app:8000/api/v1/webhooks/n8n-callback",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "workflow",
+              "value": "fb_fetch_metrics"
+            },
+            {
+              "name": "data",
+              "value": "={{ $json }}"
+            }
+          ]
+        }
+      },
+      "id": "save-to-api",
+      "name": "Save to API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, campaigns_processed: $json.data.length } }}"
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Facebook API", "type": "main", "index": 0}]]
+    },
+    "Facebook API": {
+      "main": [[{"node": "Transform Data", "type": "main", "index": 0}]]
+    },
+    "Transform Data": {
+      "main": [[{"node": "Save to API", "type": "main", "index": 0}]]
+    },
+    "Save to API": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": []
+}
+

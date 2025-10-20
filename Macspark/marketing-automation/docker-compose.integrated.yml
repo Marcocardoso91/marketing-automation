@@ -1,0 +1,211 @@
+version: '3.8'
+
+services:
+  # facebook-ads-ai-agent API
+  agent-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: marketing-agent-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/marketing_db
+      - REDIS_URL=redis://redis:6379/0
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
+      - FACEBOOK_ACCESS_TOKEN=${FACEBOOK_ACCESS_TOKEN}
+      - FACEBOOK_AD_ACCOUNT_ID=${FACEBOOK_AD_ACCOUNT_ID}
+      - ANALYTICS_API_KEY=${ANALYTICS_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - NOTION_API_TOKEN=${NOTION_API_TOKEN}
+      - ENVIRONMENT=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL (Agent API)
+  postgres:
+    image: postgres:15-alpine
+    container_name: marketing-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=marketing_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./api/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (Cache + Celery)
+  redis:
+    image: redis:7-alpine
+    container_name: marketing-redis
+    ports:
+      - "6380:6379"
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: marketing-celery-worker
+    command: celery -A src.tasks.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/marketing_db
+      - REDIS_URL=redis://redis:6379/0
+      - FACEBOOK_ACCESS_TOKEN=${FACEBOOK_ACCESS_TOKEN}
+    depends_on:
+      - redis
+      - postgres
+      - agent-api
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: marketing-celery-beat
+    command: celery -A src.tasks.celery_app beat --loglevel=info
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - marketing-net
+    restart: unless-stopped
+
+  # Apache Superset (Analytics Dashboards)
+  superset:
+    image: apache/superset:latest
+    container_name: marketing-superset
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=${SUPERSET_SECRET_KEY}
+      - DATABASE_DIALECT=postgresql
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_DB=marketing_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    volumes:
+      - ./analytics/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - superset_data:/app/superset_home
+    command: >
+      sh -c "
+        superset db upgrade &&
+        superset fab create-admin \
+          --username admin \
+          --firstname Admin \
+          --lastname User \
+          --email admin@macspark.dev \
+          --password ${SUPERSET_ADMIN_PASSWORD:-admin} &&
+        superset init &&
+        gunicorn -b 0.0.0.0:8088 \
+          --workers 2 \
+          --timeout 120 \
+          --limit-request-line 0 \
+          --limit-request-field_size 0 \
+          'superset.app:create_app()'
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Prometheus (Monitoring - Opcional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: marketing-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Grafana (Visualization - Opcional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: marketing-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - marketing-net
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+networks:
+  marketing-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  superset_data:
+  prometheus_data:
+  grafana_data:
+

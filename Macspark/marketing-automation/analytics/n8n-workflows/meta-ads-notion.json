@@ -1,0 +1,194 @@
+{
+  "name": "Meta Ads → Notion - Métricas Diárias",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger - Diário 9h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "id": "schedule-trigger-1"
+    },
+    {
+      "parameters": {
+        "resource": "adAccount",
+        "operation": "getInsights",
+        "adAccountId": "={{$env.META_AD_ACCOUNT_ID}}",
+        "additionalFields": {
+          "fields": [
+            "campaign_name",
+            "spend",
+            "impressions",
+            "reach",
+            "clicks",
+            "ctr",
+            "cpc",
+            "cpp",
+            "frequency",
+            "actions"
+          ],
+          "datePreset": "yesterday",
+          "level": "campaign",
+          "breakdowns": []
+        },
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "name": "Meta Ads - Buscar Métricas",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "id": "meta-ads-node",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "meta-ads-credentials",
+          "name": "Meta Ads API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Processar dados do Meta Ads para formato Notion\nconst items = [];\n\nfor (const item of $input.all()) {\n  const data = item.json.data || [];\n  \n  // Somar métricas de todas campanhas do dia\n  let totalSpend = 0;\n  let totalImpressions = 0;\n  let totalReach = 0;\n  let totalClicks = 0;\n  let totalFrequency = 0;\n  let totalFollowers = 0;\n  let campaignCount = data.length;\n  \n  for (const campaign of data) {\n    totalSpend += parseFloat(campaign.spend || 0);\n    totalImpressions += parseInt(campaign.impressions || 0);\n    totalReach += parseInt(campaign.reach || 0);\n    totalClicks += parseInt(campaign.clicks || 0);\n    totalFrequency += parseFloat(campaign.frequency || 0);\n    \n    // Buscar ações de \"follow\" ou \"page_engagement\"\n    if (campaign.actions) {\n      const followActions = campaign.actions.find(a => \n        a.action_type === 'follow' || \n        a.action_type === 'onsite_conversion.post_save'\n      );\n      if (followActions) {\n        totalFollowers += parseInt(followActions.value || 0);\n      }\n    }\n  }\n  \n  // Calcular médias e métricas derivadas\n  const avgCTR = totalClicks > 0 ? (totalClicks / totalImpressions) : 0;\n  const avgCPC = totalClicks > 0 ? (totalSpend / totalClicks) : 0;\n  const avgCPE = totalFollowers > 0 ? (totalSpend / totalFollowers) : 0;\n  const avgFrequency = campaignCount > 0 ? (totalFrequency / campaignCount) : 0;\n  const costPerFollower = totalFollowers > 0 ? (totalSpend / totalFollowers) : 0;\n  \n  // Data de hoje\n  const today = new Date();\n  const dateStr = today.toISOString().split('T')[0];\n  \n  items.push({\n    json: {\n      data: dateStr,\n      gastoAds: totalSpend,\n      impressoes: totalImpressions,\n      alcance: totalReach,\n      cliques: totalClicks,\n      ctr: avgCTR,\n      cpc: avgCPC,\n      cpe: avgCPE,\n      frequencia: avgFrequency,\n      novosSeguidores: totalFollowers,\n      custoPorSeguidor: costPerFollower,\n      notas: `Dados coletados automaticamente via N8n - ${campaignCount} campanhas ativas`\n    }\n  });\n}\n\nreturn items;"
+      },
+      "name": "Processar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "id": "process-data-node"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": "={{$env.NOTION_DATABASE_ID}}",
+        "title": "={{$json.data}}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Data",
+              "textValue": "={{$json.data}}"
+            },
+            {
+              "key": "Gasto Ads (R$)",
+              "numberValue": "={{$json.gastoAds}}"
+            },
+            {
+              "key": "Alcance",
+              "numberValue": "={{$json.alcance}}"
+            },
+            {
+              "key": "CTR (%)",
+              "numberValue": "={{$json.ctr}}"
+            },
+            {
+              "key": "CPC (R$)",
+              "numberValue": "={{$json.cpc}}"
+            },
+            {
+              "key": "CPE (R$)",
+              "numberValue": "={{$json.cpe}}"
+            },
+            {
+              "key": "Frequência",
+              "numberValue": "={{$json.frequencia}}"
+            },
+            {
+              "key": "Novos Seguidores",
+              "numberValue": "={{$json.novosSeguidores}}"
+            },
+            {
+              "key": "Custo por Seguidor",
+              "numberValue": "={{$json.custoPorSeguidor}}"
+            },
+            {
+              "key": "Notas",
+              "textValue": "={{$json.notas}}"
+            }
+          ]
+        }
+      },
+      "name": "Notion - Criar Registro",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "id": "notion-create-node",
+      "credentials": {
+        "notionApi": {
+          "id": "notion-credentials",
+          "name": "Notion API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.novosSeguidores}}",
+              "value2": 0,
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "name": "Verificar Se Tem Dados",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 500],
+      "id": "if-node-1"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger - Diário 9h": {
+      "main": [
+        [
+          {
+            "node": "Meta Ads - Buscar Métricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meta Ads - Buscar Métricas": {
+      "main": [
+        [
+          {
+            "node": "Processar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Dados": {
+      "main": [
+        [
+          {
+            "node": "Notion - Criar Registro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "America/Sao_Paulo",
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-10-18T13:00:00.000Z",
+  "versionId": "1"
+}
+

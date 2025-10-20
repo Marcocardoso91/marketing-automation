@@ -1,0 +1,254 @@
+{
+  "project": "Agente Facebook - Projeto Sabrina",
+  "version": "3.0.0",
+  "generated": "2025-10-18T01:00:00Z",
+  "description": "Sistema completo de automação e análise de marketing digital multi-canal com Meta Ads, Google Analytics, Google Ads, YouTube, data warehouse Supabase, visualização Apache Superset e insights IA (OpenAI)",
+  "metadata": {
+    "owner": "Sabrina (Gestora de Marketing)",
+    "stakeholders": ["Sabrina", "Equipe de Automação n8n", "Analistas de Dados"],
+    "status": "Em Execução - Semana 2",
+    "objective": "Conquistar +900 a 1.300 seguidores em 4 semanas (11 Out - 8 Nov 2025)"
+  },
+  "files": {
+    "documentation": [
+    "README.md",
+      "README-automacao.md",
+      "INICIO-RAPIDO.md",
+      "GUIA-REFERENCIA-RAPIDA.md",
+      "GUIA-RAPIDO-PROXIMOS-PASSOS.md",
+      "INDICE-COMPLETO.md",
+      "COMO-IMPORTAR-NO-NOTION.md",
+      "RESUMO-FINAL.md",
+      "RESUMO-DADOS-E-ACOES.md",
+      "RESULTADO-FINAL-SUPEROU-META.md"
+    ],
+    "data_analysis": [
+      "DADOS-EXTRAIDOS-IMAGENS.md",
+      "PARA-COPIAR-NO-NOTION-linha-base.md",
+      "PARA-ADICIONAR-NOTION-metrica-hoje.md",
+      "Análise do Plano de Crescimento de Perfil da Sabri.md",
+      "plano-crescimento-sabrina (1).md"
+    ],
+    "automation": [
+    "n8n-workflows/meta-ads-notion.json",
+      "n8n-workflows/meta-ads-supabase.json",
+      "n8n-workflows/google-analytics-supabase.json",
+      "n8n-workflows/google-ads-supabase.json",
+      "n8n-workflows/youtube-supabase.json",
+      "n8n-workflows/consolidate-analyze-notify.json",
+      "n8n-workflows/README.md",
+      "scripts/meta-to-notion.py",
+      "scripts/metrics-to-supabase.py",
+      "scripts/requirements.txt",
+      "scripts/env.example.txt",
+      "scripts/README.md",
+      "docker-compose.superset.yml",
+      "superset_config.py"
+    ],
+    "setup_guides": [
+      "docs/setup-n8n-meta-ads.md",
+      "docs/setup-supabase.md",
+      "docs/setup-slack.md",
+      "docs/setup-apache-superset.md",
+      "docs/screenshots-guide.md",
+      "docs/guides/INTEGRACAO-GOOGLE-ANALYTICS.md",
+      "docs/guides/INTEGRACAO-GOOGLE-ADS.md",
+      "docs/guides/INTEGRACAO-YOUTUBE.md"
+    ],
+    "notion_pages": [
+      "notion-pages/dashboard-campanhas-ativas.md",
+      "notion-pages/template-metricas-manuais.md"
+    ],
+    "prd": [
+      "docs/prd/agente-facebook/PRD.pt-BR.md",
+      "docs/prd/agente-facebook/PRD.en-US.md",
+      "docs/prd/agente-facebook/backlog.csv",
+      "docs/prd/agente-facebook/decisions.md",
+      "docs/prd/agente-facebook/coerencia.md",
+      "docs/prd/agente-facebook/glossario.md",
+      "docs/prd/agente-facebook/system-map.md",
+      "docs/prd/agente-facebook/inventory.json"
+    ],
+    "context": [
+      "context/agente-facebook/context.md",
+      "context/agente-facebook/decisions-history.md",
+      "context/agente-facebook/audit-log.md"
+    ]
+  },
+  "dependencies": {
+    "apis": {
+      "Meta Ads API": {
+        "version": "v21.0",
+        "endpoint": "https://graph.facebook.com/v21.0",
+        "authentication": "OAuth2 + Access Token",
+        "rate_limits": "200 calls/hour",
+        "critical_endpoints": [
+          "/act_{ad_account_id}/insights",
+          "/act_{ad_account_id}/campaigns",
+          "/act_{ad_account_id}/adsets"
+        ]
+      },
+      "Notion API": {
+        "version": "2022-06-28",
+        "endpoint": "https://api.notion.com/v1",
+        "authentication": "Bearer Token (Integration)",
+        "rate_limits": "3 requests/second",
+        "critical_endpoints": [
+          "/pages",
+          "/databases/{database_id}/query",
+          "/blocks/{block_id}/children"
+        ]
+      },
+      "Instagram Insights": {
+        "version": "Manual",
+        "access": "Via Instagram App Professional Dashboard",
+        "data_collection": "Screenshots + Manual Entry"
+      },
+      "Google Analytics 4": {
+        "version": "GA4 Data API v1",
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta",
+        "authentication": "OAuth2 or Service Account",
+        "rate_limits": "25.000 requests/day",
+        "critical_metrics": ["sessions", "users", "bounceRate", "conversions"]
+      },
+      "Google Ads API": {
+        "version": "v16",
+        "endpoint": "https://googleads.googleapis.com/v16",
+        "authentication": "OAuth2 + Developer Token",
+        "rate_limits": "15.000 operations/day",
+        "critical_metrics": ["clicks", "impressions", "cost_micros", "ctr", "conversions"]
+      },
+      "YouTube Data API": {
+        "version": "v3",
+        "endpoint": "https://www.googleapis.com/youtube/v3",
+        "authentication": "API Key or OAuth2",
+        "rate_limits": "10.000 units/day",
+        "critical_metrics": ["viewCount", "subscriberCount", "videoCount"]
+      },
+      "Slack API": {
+        "version": "Webhooks",
+        "endpoint": "https://hooks.slack.com/services",
+        "authentication": "Webhook URL or Bot Token",
+        "rate_limits": "1 message/second",
+        "usage": "Notifications and alerts"
+      },
+      "OpenAI API": {
+        "version": "v1",
+        "endpoint": "https://api.openai.com/v1",
+        "authentication": "Bearer Token",
+        "rate_limits": "500 requests/day (free tier)",
+        "models_used": ["gpt-4o-mini"]
+      }
+    },
+    "platforms": {
+      "n8n": {
+        "version": "Latest",
+        "url": "https://fluxos.macspark.dev",
+        "deployment": "VPS Linux + Docker",
+        "authentication": "API Key (JWT Token)"
+      },
+      "Docker": {
+        "version": "Latest",
+        "usage": "Container orchestration",
+        "monitoring": "Portainer"
+      },
+      "Python": {
+        "version": "3.x",
+        "packages": [
+          "requests",
+          "python-dotenv",
+          "supabase",
+          "google-auth",
+          "google-api-python-client",
+          "openai",
+          "pandas"
+        ]
+      },
+      "Supabase": {
+        "version": "Latest",
+        "type": "PostgreSQL Database (Cloud)",
+        "tier": "Free (500MB database, 2GB bandwidth)",
+        "endpoint": "https://[project].supabase.co",
+        "features": ["PostgreSQL 15+", "REST API", "Real-time", "Auth", "Storage"]
+      },
+      "Apache Superset": {
+        "version": "Latest",
+        "type": "BI/Visualization Platform",
+        "deployment": "Docker (self-hosted)",
+        "port": "8088",
+        "features": ["40+ chart types", "SQL Lab", "Dashboards", "Alerts"]
+      }
+    },
+    "tools": {
+      "MCP_Status": "disabled",
+      "MCP_Disabled_Reason": "Falha no ambiente atual (rede restrita). Manteremos integrações via APIs diretas.",
+      "MCP_Servers": []
+    }
+  },
+  "requirements": {
+    "functional": [
+      {"id": "RF-001", "description": "Conectar API Meta Ads e extrair métricas de campanhas", "priority": "P0"},
+      {"id": "RF-002", "description": "Atualizar automaticamente páginas e dashboards do Notion", "priority": "P1"},
+      {"id": "RF-003", "description": "Enviar alertas de performance via n8n", "priority": "P2"},
+      {"id": "RF-004", "description": "Coletar e processar screenshots do Instagram Insights", "priority": "P1"},
+      {"id": "RF-005", "description": "Gerar relatórios semanais de crescimento", "priority": "P2"},
+      {"id": "RF-006", "description": "Rastrear métricas diárias (CTR, CPC, CPE, Frequência)", "priority": "P0"},
+      {"id": "RF-007", "description": "Calcular custo por seguidor e ROI", "priority": "P1"}
+    ],
+    "non_functional": [
+      {"id": "RNF-001", "description": "Segurança de tokens via Docker Secrets ou .env", "priority": "P0"},
+      {"id": "RNF-002", "description": "Logs detalhados para auditoria e troubleshooting", "priority": "P1"},
+      {"id": "RNF-003", "description": "Tempo de atualização máximo de 10 minutos por ciclo", "priority": "P2"},
+      {"id": "RNF-004", "description": "Disponibilidade 99%+ (monitoramento via Portainer)", "priority": "P1"},
+      {"id": "RNF-005", "description": "Backup automático de dados críticos", "priority": "P2"},
+      {"id": "RNF-008", "description": "Data warehouse escalável com PostgreSQL (Supabase)", "priority": "P0"},
+      {"id": "RNF-009", "description": "Visualização avançada com dashboards interativos (Superset)", "priority": "P1"},
+      {"id": "RNF-010", "description": "Arquitetura modular para escalabilidade (workflows separados)", "priority": "P0"}
+    ]
+  },
+  "architecture": {
+    "stack": ["n8n", "Notion API", "Meta Ads API", "Docker Compose", "Python 3.x"],
+    "structure": "Fluxos n8n orquestrando APIs e persistência leve em Notion",
+    "infrastructure": "VPS Linux com Portainer para monitoramento",
+    "deployment": "Docker Compose com volumes persistentes",
+    "backup": "Snapshots Docker + Script Python manual"
+  },
+  "metrics": {
+    "current_state": {
+      "instagram_followers": 16130,
+      "date_baseline": "2025-10-11",
+      "change_since_baseline": -5,
+      "context": "Mudança de nicho em andamento",
+      "meta_ads_spent": 83.78,
+      "campaign_reach": 41251,
+      "avg_cpe": 0.003
+    },
+    "targets": {
+      "total_followers_goal": "900-1300 novos",
+      "timeline": "28 dias (11 Out - 8 Nov 2025)",
+      "budget": 1120.00,
+      "cost_per_follower_max": 1.30,
+      "roi_expected": "2.5-3.5x"
+    }
+  },
+  "integrations": {
+    "notion_pages_created": 23,
+    "notion_databases": 4,
+    "n8n_workflows": 5,
+    "python_scripts": 2,
+    "data_sources": 5,
+    "visualization_dashboards": 4
+  },
+  "risks": [
+    {"id": "RISK-001", "description": "Dependência de tokens válidos da Meta", "mitigation": "Renovação automática + alertas", "severity": "High"},
+    {"id": "RISK-002", "description": "Mudanças na API Meta podem quebrar fluxo", "mitigation": "Monitoramento + versioning", "severity": "Medium"},
+    {"id": "RISK-003", "description": "Limites de requisição API (rate limits)", "mitigation": "Throttling + retry logic", "severity": "Medium"},
+    {"id": "RISK-004", "description": "Mudança de nicho pode causar perda de seguidores", "mitigation": "Conteúdo de qualidade + engajamento", "severity": "Low"}
+  ],
+  "timeline": {
+    "phase_1": {"name": "Aquecimento", "period": "Semana 1 (11-17 Out)", "status": "Concluída", "results": "+116 seguidores"},
+    "phase_2": {"name": "Retargeting", "period": "Semana 2 (18-24 Out)", "status": "Em Andamento", "target": "+200-280 seguidores"},
+    "phase_3": {"name": "Otimização", "period": "Semana 3 (25-31 Out)", "status": "Planejada", "target": "+250-350 seguidores"},
+    "phase_4": {"name": "Escalonamento", "period": "Semana 4 (1-7 Nov)", "status": "Planejada", "target": "+300-450 seguidores"}
+  }
+}

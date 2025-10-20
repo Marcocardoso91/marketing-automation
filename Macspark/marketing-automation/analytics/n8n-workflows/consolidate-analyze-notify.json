@@ -1,0 +1,371 @@
+{
+  "name": "Consolidação + IA + Notificações - Dashboard Central",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger - Diário 10h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "id": "schedule-consolidate-trigger"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/daily_metrics?data=eq.{{$today.minus({days: 1}).toFormat('yyyy-MM-dd')}}&select=*",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.SUPABASE_ANON_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer ={{$env.SUPABASE_ANON_KEY}}"
+            }
+          ]
+        }
+      },
+      "name": "Supabase - Get Yesterday Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 400],
+      "id": "supabase-get-metrics"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolidar métricas de todas as fontes\nconst metrics = items;\n\nlet consolidated = {\n  data: null,\n  totalSpend: 0,\n  totalReach: 0,\n  totalImpressions: 0,\n  totalClicks: 0,\n  totalNewFollowers: 0,\n  totalSessions: 0,\n  totalUsers: 0,\n  totalViews: 0,\n  bySource: {}\n};\n\n// Agregar por fonte\nfor (const metric of metrics) {\n  const m = metric.json;\n  consolidated.data = m.data;\n  consolidated.totalSpend += parseFloat(m.spend || 0);\n  consolidated.totalReach += parseInt(m.reach || 0);\n  consolidated.totalImpressions += parseInt(m.impressions || 0);\n  consolidated.totalClicks += parseInt(m.clicks || 0);\n  consolidated.totalNewFollowers += parseInt(m.new_followers || 0);\n  consolidated.totalSessions += parseInt(m.sessions || 0);\n  consolidated.totalUsers += parseInt(m.users || 0);\n  consolidated.totalViews += parseInt(m.views || 0);\n  \n  // Por fonte\n  consolidated.bySource[m.source] = {\n    spend: parseFloat(m.spend || 0),\n    reach: parseInt(m.reach || 0),\n    followers: parseInt(m.new_followers || 0),\n    ctr: parseFloat(m.ctr || 0),\n    cpc: parseFloat(m.cpc || 0),\n    cost_per_follower: parseFloat(m.cost_per_follower || 0)\n  };\n}\n\n// Calcular métricas agregadas\nconsolidated.avgCtr = consolidated.totalImpressions > 0 \n  ? (consolidated.totalClicks / consolidated.totalImpressions) * 100 \n  : 0;\n\nconsolidated.avgCpc = consolidated.totalClicks > 0 \n  ? consolidated.totalSpend / consolidated.totalClicks \n  : 0;\n\nconsolidated.avgCostPerFollower = consolidated.totalNewFollowers > 0 \n  ? consolidated.totalSpend / consolidated.totalNewFollowers \n  : 0;\n\nreturn [{ json: consolidated }];"
+      },
+      "name": "Consolidar Todas as Fontes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 400],
+      "id": "code-consolidate"
+    },
+    {
+      "parameters": {
+        "model": {
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "name": "OpenAI - Gerar Insights",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "id": "openai-insights",
+      "credentials": {
+        "openAiApi": "OpenAI"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar prompt para OpenAI\nconst data = items[0].json;\n\nconst prompt = `Você é um analista de marketing digital especializado. Analise as métricas abaixo e forneça insights acionáveis em português (PT-BR).\n\n📊 MÉTRICAS DO DIA ${data.data}:\n\n💰 Investimento Total: R$ ${data.totalSpend.toFixed(2)}\n📈 Alcance Total: ${data.totalReach.toLocaleString()} pessoas\n👁️ Impressões: ${data.totalImpressions.toLocaleString()}\n🖱️ Cliques: ${data.totalClicks}\n📊 CTR Médio: ${data.avgCtr.toFixed(2)}%\n💵 CPC Médio: R$ ${data.avgCpc.toFixed(2)}\n👥 Novos Seguidores: ${data.totalNewFollowers}\n💰 Custo/Seguidor: R$ ${data.avgCostPerFollower.toFixed(2)}\n\n📱 PERFORMANCE POR FONTE:\n${Object.entries(data.bySource).map(([source, metrics]) => \n  `• ${source}: ${metrics.followers} seguidores (R$ ${metrics.cost_per_follower.toFixed(2)}/seg, CTR ${metrics.ctr.toFixed(2)}%)`\n).join('\\n')}\n\n🎯 METAS:\n• CTR: ≥ 1,5% (atual: ${data.avgCtr.toFixed(2)}%)\n• Custo/Seguidor: ≤ R$ 1,30 (atual: R$ ${data.avgCostPerFollower.toFixed(2)})\n• Frequência: ≤ 2,5\n\nForneça:\n1. Análise resumida (2-3 frases)\n2. Alertas se métricas abaixo da meta\n3. 2-3 ações recomendadas específicas\n\nResponda em formato markdown simples e direto.`;\n\n// Chamar OpenAI via HTTP (pois n8n-langchain pode precisar de chain)\nreturn [{\n  json: {\n    consolidated: data,\n    prompt: prompt\n  }\n}];"
+      },
+      "name": "Preparar Prompt IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 550],
+      "id": "code-prepare-prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Você é um analista de marketing digital especializado em Meta Ads, Google Ads e redes sociais. Forneça insights acionáveis e diretos em português.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.prompt }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"max_tokens\": 500\n}",
+        "options": {}
+      },
+      "name": "OpenAI API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 550],
+      "id": "openai-api-call",
+      "credentials": {
+        "openAiApi": "OpenAI"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrair insights da resposta OpenAI\nconst consolidated = items[0].json.consolidated;\nconst openaiResponse = items[0].json.choices[0].message.content;\n\nreturn [{\n  json: {\n    ...consolidated,\n    aiInsight: openaiResponse\n  }\n}];"
+      },
+      "name": "Extract AI Insights",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 550],
+      "id": "code-extract-insights"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"blocks\": [\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"📊 Relatório Diário de Marketing - {{ $json.data }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"fields\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*💰 Gasto Total:*\\nR$ {{ $json.totalSpend.toFixed(2) }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*📈 Alcance:*\\n{{ $json.totalReach.toLocaleString() }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*📊 CTR:*\\n{{ $json.avgCtr.toFixed(2) }}%\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*👥 Seguidores:*\\n+{{ $json.totalNewFollowers }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*💵 Custo/Seg:*\\nR$ {{ $json.avgCostPerFollower.toFixed(2) }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*🌐 Sessões Web:*\\n{{ $json.totalSessions.toLocaleString() }}\"\n        }\n      ]\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"🤖 *Insight IA:*\\n{{ $json.aiInsight }}\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"context\",\n      \"elements\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"📊 Performance por fonte: Meta Ads ({{ $json.bySource.meta_ads?.followers || 0 }} seg) | Google Ads ({{ $json.bySource.google_ads?.followers || 0 }} seg) | YouTube ({{ $json.bySource.youtube?.followers || 0 }} seg)\"\n        }\n      ]\n    },\n    {\n      \"type\": \"actions\",\n      \"elements\": [\n        {\n          \"type\": \"button\",\n          \"text\": {\n            \"type\": \"plain_text\",\n            \"text\": \"📊 Ver Dashboard Superset\"\n          },\n          \"url\": \"http://localhost:8088\"\n        },\n        {\n          \"type\": \"button\",\n          \"text\": {\n            \"type\": \"plain_text\",\n            \"text\": \"📝 Ver Notion\"\n          },\n          \"url\": \"https://notion.so/{{ $env.NOTION_PAGE_ID }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "name": "Slack - Enviar Relatório",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1250, 550],
+      "id": "slack-notify"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verificar anomalias e gerar alertas\nconst data = items[0].json;\nconst alerts = [];\n\n// Alerta 1: CTR abaixo da meta\nif (data.avgCtr < 1.5) {\n  alerts.push(`⚠️ *CTR abaixo da meta:* ${data.avgCtr.toFixed(2)}% (meta: 1,5%)`);\n}\n\n// Alerta 2: Custo/seguidor acima da meta\nif (data.avgCostPerFollower > 1.30) {\n  alerts.push(`⚠️ *Custo/seguidor elevado:* R$ ${data.avgCostPerFollower.toFixed(2)} (meta: R$ 1,30)`);\n}\n\n// Alerta 3: Nenhum seguidor novo\nif (data.totalNewFollowers === 0) {\n  alerts.push(`🔴 *CRÍTICO: Nenhum seguidor novo ontem!*`);\n}\n\n// Alerta 4: Gasto alto sem conversão\nif (data.totalSpend > 50 && data.totalNewFollowers < 5) {\n  alerts.push(`⚠️ *ROI baixo:* R$ ${data.totalSpend.toFixed(2)} investidos, apenas ${data.totalNewFollowers} seguidores`);\n}\n\n// Se houver alertas, enviar mensagem adicional\nif (alerts.length > 0) {\n  return [{\n    json: {\n      ...data,\n      hasAlerts: true,\n      alertMessage: `🚨 *ALERTAS DETECTADOS - ${data.data}*\\n\\n${alerts.join('\\n')}`\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...data,\n    hasAlerts: false\n  }\n}];"
+      },
+      "name": "Detectar Anomalias",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 700],
+      "id": "code-detect-anomalies"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.hasAlerts}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "IF - Tem Alertas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 700],
+      "id": "if-has-alerts"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $json.alertMessage }}\"\n}",
+        "options": {}
+      },
+      "name": "Slack - Enviar Alerta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1450, 650],
+      "id": "slack-alert"
+    },
+    {
+      "parameters": {},
+      "name": "Sem Alertas",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1450, 750],
+      "id": "no-alerts"
+    },
+    {
+      "parameters": {},
+      "name": "Success - Workflow Completo",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1650, 550],
+      "id": "final-success"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger - Diário 10h": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Yesterday Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Yesterday Metrics": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Todas as Fontes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Todas as Fontes": {
+      "main": [
+        [
+          {
+            "node": "Preparar Prompt IA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Detectar Anomalias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Prompt IA": {
+      "main": [
+        [
+          {
+            "node": "OpenAI API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI API Call": {
+      "main": [
+        [
+          {
+            "node": "Extract AI Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract AI Insights": {
+      "main": [
+        [
+          {
+            "node": "Slack - Enviar Relatório",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Anomalias": {
+      "main": [
+        [
+          {
+            "node": "IF - Tem Alertas?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Tem Alertas?": {
+      "main": [
+        [
+          {
+            "node": "Slack - Enviar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem Alertas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack - Enviar Relatório": {
+      "main": [
+        [
+          {
+            "node": "Success - Workflow Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack - Enviar Alerta": {
+      "main": [
+        [
+          {
+            "node": "Success - Workflow Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem Alertas": {
+      "main": [
+        [
+          {
+            "node": "Success - Workflow Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0.0",
+  "tags": [
+    {
+      "name": "marketing",
+      "id": "marketing-tag"
+    },
+    {
+      "name": "consolidation",
+      "id": "consolidation-tag"
+    },
+    {
+      "name": "ai",
+      "id": "ai-tag"
+    }
+  ]
+}
+

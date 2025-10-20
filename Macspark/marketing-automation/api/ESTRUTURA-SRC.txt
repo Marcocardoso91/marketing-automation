@@ -1,0 +1,65 @@
+﻿Listagem de caminhos de pasta
+O n·mero de sÚrie do volume Ú F0A2-4779
+C:\USERS\MARCO\MACSPARK\FACEBOOK-ADS-AI-AGENT\SRC
+ª   __init__.py
+ª   
++---agents
+ª       facebook_agent.py
+ª       __init__.py
+ª       
++---analytics
+ª       performance_analyzer.py
+ª       __init__.py
+ª       
++---api
+ª       analytics.py
+ª       automation.py
+ª       campaigns.py
+ª       chat.py
+ª       __init__.py
+ª       
++---automation
+ª       campaign_optimizer.py
+ª       __init__.py
+ª       
++---integrations
+ª       n8n_client.py
+ª       __init__.py
+ª       
++---models
+ª       audit_log.py
+ª       campaign.py
+ª       conversation.py
+ª       insight.py
+ª       suggestion.py
+ª       user.py
+ª       __init__.py
+ª       
++---reports
+ª       __init__.py
+ª       
++---schemas
+ª       campaign_schemas.py
+ª       chat_schemas.py
+ª       insight_schemas.py
+ª       suggestion_schemas.py
+ª       __init__.py
+ª       
++---tasks
+ª       celery_app.py
+ª       collectors.py
+ª       notifiers.py
+ª       processors.py
+ª       __init__.py
+ª       
++---utils
+        api_client.py
+        config.py
+        context_memory.py
+        database.py
+        logger.py
+        metrics.py
+        middleware.py
+        token_manager.py
+        __init__.py
+        
