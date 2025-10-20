@@ -1,12 +1,14 @@
-# Analytics (Projeto Sabrina) – Visão Atual
+# Analytics - Marketing Automation Platform
 
-Este diretório reúne scripts Python, workflows n8n e documentação que foram produzidos para o “Projeto Sabrina”. Parte do material descreve metas e resultados planejados; mantivemos os arquivos originais para consulta histórica, mas nem tudo está automatizado end-to-end.
+**Propósito:** Data pipelines, workflows N8N e Business Intelligence (Apache Superset)
+
+Este diretório contém scripts Python, workflows n8n e documentação do "Projeto Sabrina" (crescimento Instagram). Parte do material descreve metas e resultados históricos (v3.0); mantivemos para consulta, mas valide o status antes de executar.
 
 ## Componentes principais
 
 | Caminho | Descrição | Status |
 |---------|-----------|--------|
-| `scripts/metrics-to-supabase.py` | Script Python que consome o Agent API (`/api/v1/metrics/export`) e grava métricas no Supabase. | ✅ Funcional |
+| `scripts/metrics-to-supabase.py` | Script Python que consome o Backend API (`/api/v1/metrics/export`) e grava métricas no Supabase. | ✅ Funcional |
 | `n8n-workflows/` | Workflows n8n (JSON) usados como template. Dependem de uma instância n8n configurada. | ⚠️ Necessário ajustar endpoints/tokens |
 | `docs/` | Guias, PRDs e relatórios do Projeto Sabrina (v3.0). | ⚠️ Mistura conteúdo conceitual e prático |
 | `README`s auxiliares (`🚀-COMECE-AQUI`, `IMPLEMENTACAO-...`) | Tutoriais para setup completo (≈90 min) | ⚠️ Planejamento histórico |
@@ -28,7 +30,7 @@ python metrics-to-supabase.py
 Os arquivos como `RESUMO-EXECUTIVO-v3.0.md`, `IMPLEMENTACAO-v3.0-COMPLETA.md` e PRDs descrevem a visão completa do projeto (metas de seguidores, ROI, automações multi-fonte etc.). Use-os como material de referência, mas verifique o status real antes de executar:
 
 - **Notion Workspace / Supabase / Slack**: requerem criação manual das credenciais.  
-- **MCP (Notion/n8n)**: ver `api/docs/MCP-INTEGRATION.md` para um guia atualizado sobre como disponibilizar essas integrações para agentes.
+- **MCP (Notion/n8n)**: ver `backend/docs/MCP-INTEGRATION.md` para um guia atualizado sobre como disponibilizar essas integrações para agentes.
 
 ## Próximos passos sugeridos
 
@@ -41,7 +43,7 @@ Os arquivos como `RESUMO-EXECUTIVO-v3.0.md`, `IMPLEMENTACAO-v3.0-COMPLETA.md` e 
 
 - `IMPLEMENTACAO-v3.0-COMPLETA.md` – passo a passo detalhado do Projeto Sabrina (histórico).  
 - `VALIDACAO-COMPLETA-v3.0.md` – relatório de validação original.  
-- `api/docs/MCP-INTEGRATION.md` – integração com agentes via MCP (atual).  
+- `backend/docs/MCP-INTEGRATION.md` – integração com agentes via MCP (atual).  
 - `shared/README.md` – como instalar/utilizar o pacote `marketing_shared`.
 
 ---
