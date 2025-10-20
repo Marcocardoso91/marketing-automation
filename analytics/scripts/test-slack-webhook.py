@@ -8,7 +8,8 @@ import json
 from datetime import datetime
 
 # Webhook URL do Slack
-SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+# Substitua pela sua URL
+SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 
 
 def test_simple_message():
