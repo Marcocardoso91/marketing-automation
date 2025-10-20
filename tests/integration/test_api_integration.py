@@ -1,10 +1,10 @@
 """
-Wrapper para reutilizar os testes de integração definidos em `api/tests`.
+Wrapper para reutilizar os testes de integração definidos em `backend/tests`.
 Evita duplicar lógica entre diretórios mantendo o runner legado compatível.
 """
 import pytest
 
-from api.tests.integration.test_api_integration import (  # noqa: F401,F403
+from backend.tests.integration.test_api_integration import (  # noqa: F401,F403
     TestCampaignsAPI,
     TestAnalyticsAPI,
     TestAutomationAPI,
@@ -12,7 +12,7 @@ from api.tests.integration.test_api_integration import (  # noqa: F401,F403
 )
 
 # Exporta testes adicionais (schema validation) do pacote compartilhado
-from api.tests.integration.test_api_integration import *  # noqa: F401,F403,E402
+from backend.tests.integration.test_api_integration import *  # noqa: F401,F403,E402
 
 
 class TestSchemaValidation:
