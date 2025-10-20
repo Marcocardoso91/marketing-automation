@@ -1,0 +1,143 @@
+{
+  "tech_stack": [
+    "HTML5",
+    "CSS3 (Tailwind CSS 3.4)",
+    "JavaScript (ES6+)",
+    "Alpine.js 3.x",
+    "Chart.js 4.4.0",
+    "Day.js 1.11.10",
+    "Axios (HTTP client)",
+    "LocalStorage API",
+    "Vercel (deployment)"
+  ],
+  "features": [
+    {
+      "name": "Login Page",
+      "description": "Página de autenticação com email/senha, validação de formulário, feedback visual, integração JWT",
+      "files": ["index.html", "assets/js/auth.js", "assets/js/api.js"],
+      "api_doc": {
+        "endpoint": "POST /api/auth/login",
+        "request": {
+          "email": "string",
+          "password": "string"
+        },
+        "response": {
+          "success": "boolean",
+          "token": "string",
+          "user": "object"
+        }
+      }
+    },
+    {
+      "name": "Dashboard Principal",
+      "description": "Dashboard executivo com 4 KPIs cards (CTR, CPC, Novos Seguidores, Investimento), 2 gráficos Chart.js (Evolução CTR, Seguidores por Dia), alertas recentes, filtro de período",
+      "files": ["dashboard.html", "assets/js/api.js"],
+      "api_doc": {
+        "endpoint": "GET /api/metrics",
+        "query_params": {
+          "period": "7d|30d|90d",
+          "date": "YYYY-MM-DD",
+          "limit": "number",
+          "offset": "number"
+        },
+        "response": {
+          "success": "boolean",
+          "data": "array",
+          "pagination": "object"
+        }
+      }
+    },
+    {
+      "name": "Cronograma de Posts",
+      "description": "Timeline visual de 4 semanas com posts planejados, filtros por semana/formato/status, busca por palavra-chave, marcar como postado",
+      "files": ["cronograma.html"],
+      "api_doc": {
+        "endpoint": "GET /api/schedule",
+        "query_params": {
+          "week": "1|2|3|4",
+          "status": "planned|posted|cancelled",
+          "format": "reel|carousel|stories"
+        },
+        "response": {
+          "success": "boolean",
+          "data": "array"
+        }
+      }
+    },
+    {
+      "name": "Biblioteca de Ganchos Virais",
+      "description": "50 ganchos organizados por 10 categorias (Curiosidade, Urgência, Transformação, etc), busca textual, filtros, copiar para clipboard, contador de uso",
+      "files": ["ganchos.html"],
+      "api_doc": {
+        "endpoint": "GET /api/hooks",
+        "query_params": {
+          "category": "string",
+          "search": "string",
+          "limit": "number"
+        },
+        "response": {
+          "success": "boolean",
+          "data": "array",
+          "categories": "array"
+        }
+      }
+    },
+    {
+      "name": "Checklist de Produção",
+      "description": "Checklist interativo com 6 fases (Planejamento, Gravação, Edição, Publicação, Monitoramento, Pós-produção), progresso visual, persistência local, reset",
+      "files": ["checklist.html"]
+    },
+    {
+      "name": "Relatórios Semanais",
+      "description": "Relatórios compilados com resumo executivo, gráficos de performance, comparação com metas, top 3 posts, export PDF",
+      "files": ["relatorios.html"],
+      "api_doc": {
+        "endpoint": "GET /api/metrics/summary",
+        "query_params": {
+          "period": "7d|30d|90d"
+        },
+        "response": {
+          "success": "boolean",
+          "data": {
+            "averages": "object",
+            "totals": "object",
+            "trends": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "Configurações de Alertas",
+      "description": "Interface para configurar thresholds (CTR min, CPC max, etc), número WhatsApp, horários de alertas, salvamento persistente",
+      "files": ["configuracoes.html"],
+      "api_doc": {
+        "endpoint": "PUT /api/alerts/config",
+        "request": {
+          "thresholds": "object",
+          "whatsapp": "object",
+          "schedule": "object"
+        },
+        "response": {
+          "success": "boolean",
+          "data": "object"
+        }
+      }
+    },
+    {
+      "name": "Cliente HTTP (API)",
+      "description": "Cliente HTTP genérico com autenticação JWT automática, error handling, timeout, retry, métodos GET/POST/PUT/DELETE",
+      "files": ["assets/js/api.js"]
+    },
+    {
+      "name": "Sistema de Autenticação (Frontend)",
+      "description": "Gerenciamento de autenticação JWT, proteção de rotas, localStorage management, logout automático em 401, redirect inteligente",
+      "files": ["assets/js/auth.js"]
+    },
+    {
+      "name": "Navegação Unificada",
+      "description": "Menu de navegação consistente em todas páginas com 6 links (Dashboard, Cronograma, Ganchos, Checklist, Relatórios, Configurações)",
+      "files": ["dashboard.html", "cronograma.html", "ganchos.html", "checklist.html", "relatorios.html", "configuracoes.html"]
+    }
+  ]
+}
+
