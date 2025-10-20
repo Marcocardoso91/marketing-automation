@@ -2,6 +2,14 @@
 
 ## [1.1.0] - 2025-10-20
 
+### Changed - Reorganização Completa de Estrutura
+
+#### Limpeza Final da Raiz
+- ✅ Movidos 9 documentos de processo para `docs/archive/process/`
+- ✅ Raiz limpa: 3 docs essenciais + configs (era 12 docs)
+- ✅ Criada pasta `docs/archive/process/` para docs de análise
+- ✅ Estrutura 100% profissional e clean
+
 ### Changed - Reorganização de Estrutura
 
 #### Estrutura de Pastas
