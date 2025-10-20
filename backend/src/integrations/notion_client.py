@@ -4,72 +4,174 @@ Integração com Notion para documentação e relatórios
 """
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+import os
+
+import httpx
+
+from src.utils.config import settings
+from src.utils.exceptions import NotionAPIError
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+NOTION_API_BASE_URL = "https://api.notion.com/v1"
+NOTION_DEFAULT_VERSION = "2022-06-28"
+
 
 class NotionClient:
     """
-    Cliente para integração com Notion via MCP
+    Cliente para integração com Notion via REST API.
 
-    Funcionalidades:
-    - Criar páginas de relatório
-    - Salvar sugestões de otimização
-    - Documentar análises de performance
-    - Criar dashboards executivos
+    Quando o token ou o database não estiverem configurados os métodos lançam
+    `NotionAPIError`. Desta forma a camada FastAPI pode responder com um
+    HTTP 503 ao invés de retornar sucesso com `None`.
     """
 
     def __init__(self, database_id: Optional[str] = None):
-        """
-        Initialize Notion client
+        self.database_id = database_id or settings.NOTION_DATABASE_ID
+        self.token = settings.NOTION_API_TOKEN or os.getenv("NOTION_TOKEN")
+        self.timeout = float(os.getenv("NOTION_TIMEOUT", "30"))
 
-        Args:
-            database_id: ID do database Notion para salvar campanhas
-        """
-        self.database_id = database_id
+        if not self.token:
+            logger.warning(
+                "NOTION_API_TOKEN not configured – Notion endpoints will return 503"
+            )
 
+    # ------------------------------------------------------------------ #
+    # Helpers
+    # ------------------------------------------------------------------ #
+    def _ensure_configured(
+        self,
+        database_id: Optional[str] = None,
+        *,
+        require_database: bool = False,
+    ) -> str:
+        if not self.token:
+            raise NotionAPIError(
+                message="Notion API token is not configured; set NOTION_API_TOKEN"
+            )
+
+        resolved_database = database_id or self.database_id
+        if require_database and not resolved_database:
+            raise NotionAPIError(
+                message="Notion database_id not provided; configure NOTION_DATABASE_ID"
+            )
+        return resolved_database
+
+    def _headers(self) -> Dict[str, str]:
+        return {
+            "Authorization": f"Bearer {self.token}",
+            "Notion-Version": NOTION_DEFAULT_VERSION,
+            "Content-Type": "application/json",
+        }
+
+    async def _post(self, path: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{NOTION_API_BASE_URL}{path}"
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    url,
+                    headers=self._headers(),
+                    json=payload,
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPStatusError as exc:
+            logger.error(
+                "Notion API error (%s): %s",
+                exc.response.status_code,
+                exc.response.text,
+            )
+            raise NotionAPIError(
+                message=f"Notion API error ({exc.response.status_code})",
+                details={"status": exc.response.status_code},
+            ) from exc
+        except httpx.RequestError as exc:
+            logger.error("Unable to reach Notion API: %s", exc)
+            raise NotionAPIError(
+                message="Unable to reach Notion API", details={"error": str(exc)}
+            ) from exc
+
+    async def _request(
+        self,
+        method: str,
+        path: str,
+        payload: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        url = f"{NOTION_API_BASE_URL}{path}"
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.request(
+                    method=method,
+                    url=url,
+                    headers=self._headers(),
+                    json=payload,
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPStatusError as exc:
+            logger.error(
+                "Notion API error (%s): %s",
+                exc.response.status_code,
+                exc.response.text,
+            )
+            raise NotionAPIError(
+                message=f"Notion API error ({exc.response.status_code})",
+                details={"status": exc.response.status_code},
+            ) from exc
+        except httpx.RequestError as exc:
+            logger.error("Unable to reach Notion API: %s", exc)
+            raise NotionAPIError(
+                message="Unable to reach Notion API", details={"error": str(exc)}
+            ) from exc
+
+    @staticmethod
+    def _title_property(title: str) -> Dict[str, Any]:
+        return {
+            "Name": {
+                "title": [
+                    {
+                        "type": "text",
+                        "text": {"content": title},
+                    }
+                ]
+            }
+        }
+
+    # ------------------------------------------------------------------ #
+    # Public API
+    # ------------------------------------------------------------------ #
     async def create_campaign_report(
         self,
         campaign_data: Dict[str, Any],
         insights: Dict[str, Any],
         score: float,
-        suggestions: List[Dict[str, Any]]
+        suggestions: List[Dict[str, Any]],
+        *,
+        database_id: Optional[str] = None,
     ) -> Optional[str]:
         """
-        Cria relatório de campanha no Notion
-
-        Args:
-            campaign_data: Dados da campanha
-            insights: Métricas de performance
-            score: Score 0-100
-            suggestions: Lista de sugestões geradas
-
-        Returns:
-            URL da página criada ou None
+        Cria relatório de campanha no Notion e retorna a URL da página.
         """
-        try:
-            # Formatar conteúdo em Notion Markdown
-            content = self._format_campaign_report(
-                campaign_data, insights, score, suggestions
-            )
+        resolved_database = self._ensure_configured(
+            database_id, require_database=True
+        )
 
-            properties = {
-                "title": f"📊 {campaign_data['name']} - {datetime.now().strftime('%d/%m/%Y')}",
-                "Score": score,
-                "CTR": insights.get('ctr', 0),
-                "CPA": insights.get('cpa', 0),
-                "Spend": insights.get('spend', 0),
-                "Status": campaign_data.get('status', 'ACTIVE')
-            }
+        title = f"📊 {campaign_data['name']} - {datetime.now().strftime('%d/%m/%Y')}"
+        content_blocks = self._format_campaign_report(
+            campaign_data, insights, score, suggestions
+        )
 
-            logger.warning(
-                "Notion MCP integration not configured; returning placeholder response")
-            return None  # Retornaria URL da página
+        payload = {
+            "parent": {"database_id": resolved_database},
+            "properties": self._title_property(title),
+            "children": content_blocks,
+        }
 
-        except Exception as e:
-            logger.error(f"Erro ao criar relatório Notion: {e}")
-            return None
+        response = await self._post("/pages", payload)
+        page_url = response.get("url")
+        logger.info("Created Notion campaign report: %s", page_url)
+        return page_url
 
     async def create_daily_summary(
         self,
@@ -77,169 +179,278 @@ class NotionClient:
         total_spend: float,
         campaigns_analyzed: int,
         top_performers: List[Dict],
-        underperformers: List[Dict]
+        underperformers: List[Dict],
+        *,
+        database_id: Optional[str] = None,
     ) -> Optional[str]:
         """
-        Cria sumário diário no Notion
-
-        Args:
-            date: Data do relatório
-            total_spend: Gasto total do dia
-            campaigns_analyzed: Número de campanhas analisadas
-            top_performers: Campanhas com melhor performance
-            underperformers: Campanhas com pior performance
-
-        Returns:
-            URL da página criada
+        Cria sumário diário no Notion e retorna a URL da página.
         """
-        try:
-            content = f"""# 📅 Relatório Diário - {date}
+        resolved_database = self._ensure_configured(
+            database_id, require_database=True
+        )
 
-## 💰 Resumo Financeiro
-- **Gasto Total:** R$ {total_spend:,.2f}
-- **Campanhas Analisadas:** {campaigns_analyzed}
+        title = f"📅 Relatório Diário - {date}"
+        content_blocks = self._format_daily_summary(
+            date,
+            total_spend,
+            campaigns_analyzed,
+            top_performers,
+            underperformers,
+        )
 
-## 🏆 Top Performers ({len(top_performers)})
+        payload = {
+            "parent": {"database_id": resolved_database},
+            "properties": self._title_property(title),
+            "children": content_blocks,
+        }
 
-"""
-            for idx, campaign in enumerate(top_performers[:5], 1):
-                insights = campaign.get('insights', {})
-                content += f"""### {idx}. {campaign['name']}
-- **Score:** {campaign.get('score', 0):.1f}/100
-- **CTR:** {insights.get('ctr', 0):.2f}%
-- **CPA:** R$ {insights.get('cpa', 0):.2f}
-- **Spend:** R$ {insights.get('spend', 0):.2f}
-
-"""
-
-            content += f"""## ⚠️ Underperformers ({len(underperformers)})
-
-"""
-            for idx, campaign in enumerate(underperformers[:5], 1):
-                insights = campaign.get('insights', {})
-                content += f"""### {idx}. {campaign['name']}
-- **Problemas:** {', '.join(campaign.get('reasons', []))}
-- **CTR:** {insights.get('ctr', 0):.2f}%
-- **CPA:** R$ {insights.get('cpa', 0):.2f}
-- **Spend:** R$ {insights.get('spend', 0):.2f}
-
-"""
-
-            properties = {
-                "title": f"📊 Relatório Diário - {date}",
-                "Date": date,
-                "Total Spend": total_spend,
-                "Campaigns": campaigns_analyzed
-            }
-
-            logger.warning("Notion MCP integration not configured; resumo diário não foi criado")
-            return None
-
-        except Exception as e:
-            logger.error(f"Erro ao criar sumário diário Notion: {e}")
-            return None
+        response = await self._post("/pages", payload)
+        page_url = response.get("url")
+        logger.info("Created Notion daily summary: %s", page_url)
+        return page_url
 
     async def save_suggestion(
         self,
-        suggestion: Dict[str, Any]
+        suggestion: Dict[str, Any],
+        *,
+        database_id: Optional[str] = None,
     ) -> Optional[str]:
         """
-        Salva sugestão de otimização no Notion
-
-        Args:
-            suggestion: Dados da sugestão
-
-        Returns:
-            URL da página criada
+        Salva sugestão de otimização no Notion e retorna a URL da página.
         """
-        try:
-            content = f"""# 💡 Sugestão: {suggestion['type']}
+        resolved_database = self._ensure_configured(
+            database_id, require_database=True
+        )
 
-## 📊 Campanha
-- **ID:** {suggestion['campaign_id']}
-- **Nome:** {suggestion['campaign_name']}
+        title = f"💡 {suggestion['campaign_name']} - {suggestion['type']}"
+        content_blocks = self._format_suggestion(suggestion)
 
-## 🎯 Recomendação
-{suggestion['reason']}
+        payload = {
+            "parent": {"database_id": resolved_database},
+            "properties": self._title_property(title),
+            "children": content_blocks,
+        }
 
-## 📈 Dados
-"""
-            for key, value in suggestion.get('data', {}).items():
-                content += f"- **{key}:** {value}\n"
+        response = await self._post("/pages", payload)
+        page_url = response.get("url")
+        logger.info("Created Notion suggestion page: %s", page_url)
+        return page_url
 
-            properties = {
-                "title": f"💡 {suggestion['campaign_name']} - {suggestion['type']}",
-                "Type": suggestion['type'],
-                "Campaign": suggestion['campaign_name'],
-                "Status": "PENDING"
+    async def search_pages(
+        self,
+        query: str,
+        filter_database: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Search Notion pages using Notion API.
+        """
+        self._ensure_configured()
+
+        payload: Dict[str, Any] = {
+            "query": query,
+            "sort": {
+                "direction": "descending",
+                "timestamp": "last_edited_time",
+            },
+        }
+
+        if filter_database or self.database_id:
+            payload["filter"] = {
+                "property": "object",
+                "value": "page",
             }
 
-            logger.warning("Notion MCP integration não configurada; sugestão apenas registrada em log")
-            return None
+        response = await self._request("POST", "/search", payload)
+        results = response.get("results", [])
 
-        except Exception as e:
-            logger.error(f"Erro ao salvar sugestão Notion: {e}")
-            return None
+        formatted_results: List[Dict[str, Any]] = []
+        for page in results:
+            title = "Untitled"
+            properties = page.get("properties", {})
+            for prop_data in properties.values():
+                if prop_data.get("type") == "title":
+                    title_array = prop_data.get("title", [])
+                    if title_array:
+                        title = title_array[0].get("plain_text", "Untitled")
+                    break
 
+            formatted_results.append(
+                {
+                    "id": page.get("id"),
+                    "title": title,
+                    "url": page.get("url"),
+                    "last_edited_time": page.get("last_edited_time"),
+                    "created_time": page.get("created_time"),
+                    "object": page.get("object", "page"),
+                }
+            )
+
+        logger.info("Found %d results for Notion query '%s'", len(formatted_results), query)
+        return formatted_results
+
+    # ------------------------------------------------------------------ #
+    # Content helpers
+    # ------------------------------------------------------------------ #
     def _format_campaign_report(
         self,
-        campaign: Dict,
-        insights: Dict,
+        campaign: Dict[str, Any],
+        insights: Dict[str, Any],
         score: float,
-        suggestions: List[Dict]
-    ) -> str:
-        """Formata relatório de campanha em Notion Markdown"""
+        suggestions: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        rating = (
+            "🟢 Excelente"
+            if score >= 80
+            else "🟡 Bom"
+            if score >= 60
+            else "🟠 Regular"
+            if score >= 40
+            else "🔴 Ruim"
+        )
 
-        rating = '🟢 Excelente' if score >= 80 else '🟡 Bom' if score >= 60 else '🟠 Regular' if score >= 40 else '🔴 Ruim'
-
-        content = f"""# 📊 Relatório: {campaign['name']}
-
-## 🎯 Score Geral
-**{score:.1f}/100** - {rating}
-
-## 📈 Métricas Principais
-- **CTR:** {insights.get('ctr', 0):.2f}%
-- **CPC:** R$ {insights.get('cpc', 0):.2f}
-- **CPM:** R$ {insights.get('cpm', 0):.2f}
-- **CPA:** R$ {insights.get('cpa', 0):.2f}
-- **ROAS:** {insights.get('roas', 'N/A')}
-
-## 💰 Gastos
-- **Spend Total:** R$ {insights.get('spend', 0):,.2f}
-- **Orçamento Diário:** R$ {campaign.get('daily_budget', 'N/A')}
-
-## 📊 Engajamento
-- **Impressões:** {insights.get('impressions', 0):,}
-- **Cliques:** {insights.get('clicks', 0):,}
-- **Alcance:** {insights.get('reach', 0):,}
-- **Frequência:** {insights.get('frequency', 0):.2f}
-
-## 🛒 Conversões
-- **Purchases:** {insights.get('purchases', 0)}
-- **Revenue:** R$ {insights.get('revenue', 0):,.2f}
-
-"""
+        blocks: List[Dict[str, Any]] = [
+            self._paragraph_block(
+                f"Score geral: {score:.1f}/100 – {rating}"
+            ),
+            self._heading_block("Métricas Principais"),
+            self._bulleted_block(
+                [
+                    f"CTR: {insights.get('ctr', 0):.2f}%",
+                    f"CPC: R$ {insights.get('cpc', 0):.2f}",
+                    f"CPM: R$ {insights.get('cpm', 0):.2f}",
+                    f"CPA: R$ {insights.get('cpa', 0):.2f}",
+                    f"ROAS: {insights.get('roas', 'N/A')}",
+                ]
+            ),
+            self._heading_block("Gastos"),
+            self._bulleted_block(
+                [
+                    f"Spend Total: R$ {insights.get('spend', 0):,.2f}",
+                    f"Orçamento Diário: R$ {campaign.get('daily_budget', 'N/A')}",
+                ]
+            ),
+            self._heading_block("Engajamento"),
+            self._bulleted_block(
+                [
+                    f"Impressões: {insights.get('impressions', 0):,}",
+                    f"Cliques: {insights.get('clicks', 0):,}",
+                    f"Alcance: {insights.get('reach', 0):,}",
+                    f"Frequência: {insights.get('frequency', 0):.2f}",
+                ]
+            ),
+        ]
 
         if suggestions:
-            content += f"""## 💡 Sugestões ({len(suggestions)})
+            suggestion_lines = [
+                f"{idx+1}. {item['type']} – {item['reason']}"
+                for idx, item in enumerate(suggestions)
+            ]
+            blocks.append(self._heading_block("Sugestões"))
+            blocks.append(self._bulleted_block(suggestion_lines))
 
-"""
-            for idx, sug in enumerate(suggestions, 1):
-                content += f"""### {idx}. {sug['type']}
-**Motivo:** {sug['reason']}
+        blocks.append(
+            self._paragraph_block(
+                f"Geração: {datetime.now().strftime('%d/%m/%Y %H:%M')} – Sistema: Facebook Ads AI Agent"
+            )
+        )
+        return blocks
 
-"""
+    def _format_daily_summary(
+        self,
+        date: str,
+        total_spend: float,
+        campaigns_analyzed: int,
+        top_performers: List[Dict],
+        underperformers: List[Dict],
+    ) -> List[Dict[str, Any]]:
+        blocks: List[Dict[str, Any]] = [
+            self._paragraph_block(f"Data do relatório: {date}"),
+            self._heading_block("Resumo Financeiro"),
+            self._bulleted_block(
+                [
+                    f"Gasto total: R$ {total_spend:,.2f}",
+                    f"Campanhas analisadas: {campaigns_analyzed}",
+                ]
+            ),
+        ]
 
-        content += f"""---
-**Gerado em:** {datetime.now().strftime('%d/%m/%Y %H:%M')}  
-**Sistema:** Facebook Ads AI Agent v1.0
-"""
+        if top_performers:
+            lines = []
+            for idx, campaign in enumerate(top_performers[:5], 1):
+                insights = campaign.get("insights", {})
+                lines.append(
+                    f"{idx}. {campaign['name']} – Score {campaign.get('score', 0):.1f}/100 | CTR {insights.get('ctr', 0):.2f}% | Spend R$ {insights.get('spend', 0):.2f}"
+                )
+            blocks.append(self._heading_block("Top Performers"))
+            blocks.append(self._bulleted_block(lines))
 
-        return content
+        if underperformers:
+            lines = []
+            for idx, campaign in enumerate(underperformers[:5], 1):
+                insights = campaign.get("insights", {})
+                lines.append(
+                    f"{idx}. {campaign['name']} – Problemas: {', '.join(campaign.get('reasons', [])) or 'N/A'} | CTR {insights.get('ctr', 0):.2f}% | Spend R$ {insights.get('spend', 0):.2f}"
+                )
+            blocks.append(self._heading_block("Campanhas com Atenção"))
+            blocks.append(self._bulleted_block(lines))
+
+        return blocks
+
+    def _format_suggestion(self, suggestion: Dict[str, Any]) -> List[Dict[str, Any]]:
+        data_lines = [
+            f"{key}: {value}" for key, value in suggestion.get("data", {}).items()
+        ]
+        blocks = [
+            self._paragraph_block(
+                f"Campanha: {suggestion['campaign_name']} ({suggestion['campaign_id']})"
+            ),
+            self._paragraph_block(f"Tipo: {suggestion['type']}"),
+            self._paragraph_block(f"Motivo: {suggestion['reason']}"),
+        ]
+        if data_lines:
+            blocks.append(self._heading_block("Dados"))
+            blocks.append(self._bulleted_block(data_lines))
+        return blocks
+
+    @staticmethod
+    def _paragraph_block(text: str) -> Dict[str, Any]:
+        return {
+            "object": "block",
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [
+                    {
+                        "type": "text",
+                        "text": {"content": text},
+                    }
+                ]
+            },
+        }
+
+    @staticmethod
+    def _heading_block(text: str) -> Dict[str, Any]:
+        return {
+            "object": "block",
+            "type": "heading_2",
+            "heading_2": {
+                "rich_text": [
+                    {
+                        "type": "text",
+                        "text": {"content": text},
+                    }
+                ]
+            },
+        }
+
+    @staticmethod
+    def _bulleted_block(lines: List[str]) -> Dict[str, Any]:
+        bullet_text = "\n".join(f"• {line}" for line in lines)
+        return NotionClient._paragraph_block(bullet_text)
 
 
 # Singleton
-_notion_client = None
+_notion_client: Optional[NotionClient] = None
 
 
 def get_notion_client(database_id: Optional[str] = None) -> NotionClient:
@@ -247,97 +458,6 @@ def get_notion_client(database_id: Optional[str] = None) -> NotionClient:
     global _notion_client
     if _notion_client is None:
         _notion_client = NotionClient(database_id)
+    elif database_id:
+        _notion_client.database_id = database_id
     return _notion_client
-
-    async def search_pages(
-        self,
-        query: str,
-        filter_database: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        Search Notion pages using Notion API.
-
-        Implements P0 #4 - Real Notion search functionality.
-
-        Args:
-            query: Text to search for
-            filter_database: Optional database ID to filter results
-
-        Returns:
-            List of matching pages with title, ID, and URL
-
-        Raises:
-            Exception: If Notion API token not configured or API error
-        """
-        try:
-            from src.utils.config import settings
-            import aiohttp
-
-            if not settings.NOTION_API_TOKEN:
-                logger.error("NOTION_API_TOKEN not configured")
-                return []
-
-            url = "https://api.notion.com/v1/search"
-            headers = {
-                "Authorization": f"Bearer {settings.NOTION_API_TOKEN}",
-                "Notion-Version": "2022-06-28",
-                "Content-Type": "application/json"
-            }
-
-            body = {
-                "query": query,
-                "sort": {
-                    "direction": "descending",
-                    "timestamp": "last_edited_time"
-                }
-            }
-
-            # Optional: filter by database
-            if filter_database:
-                body["filter"] = {
-                    "property": "object",
-                    "value": "page"
-                }
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=body, headers=headers) as response:
-                    if response.status != 200:
-                        error_text = await response.text()
-                        logger.error(f"Notion API error {response.status}: {error_text}")
-                        return []
-
-                    data = await response.json()
-                    results = data.get("results", [])
-
-                    # Format results
-                    formatted_results = []
-                    for page in results:
-                        # Extract title from properties
-                        title = "Untitled"
-                        if "properties" in page:
-                            for prop_name, prop_data in page["properties"].items():
-                                if prop_data.get("type") == "title":
-                                    title_array = prop_data.get("title", [])
-                                    if title_array:
-                                        title = title_array[0].get("plain_text", "Untitled")
-                                    break
-
-                        formatted_results.append({
-                            "id": page.get("id"),
-                            "title": title,
-                            "url": page.get("url"),
-                            "last_edited_time": page.get("last_edited_time"),
-                            "created_time": page.get("created_time"),
-                            "object": page.get("object", "page")
-                        })
-
-                    logger.info(f"Found {len(formatted_results)} results for query: '{query}'")
-                    return formatted_results
-
-        except ImportError as e:
-            logger.error(f"Missing dependency for Notion search: {e}")
-            logger.warning("Install with: pip install aiohttp")
-            return []
-        except Exception as e:
-            logger.error(f"Error searching Notion: {e}")
-            return []

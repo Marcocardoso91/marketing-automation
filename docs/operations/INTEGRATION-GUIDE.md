@@ -105,7 +105,23 @@ AGENT_API_URL=http://localhost:8000
 ANALYTICS_API_KEY=your_generated_key_here  # Mesma key
 ```
 
-### 3. Testar Conexão
+### 3. Variáveis MCP obrigatórias
+
+As rotas MCP precisam das seguintes variáveis no `.env` do backend:
+
+```bash
+# Integração n8n
+N8N_API_URL=https://fluxos.macspark.dev/api/v1
+N8N_API_KEY=insira_sua_chave_api
+
+# Integração Notion
+NOTION_API_TOKEN=secret_xxx
+NOTION_DATABASE_ID=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+```
+
+Sem esses valores, os endpoints `/api/v1/n8n/*` e `/api/v1/notion/*` respondem com **503 Service Unavailable**, indicando que a integração externa ainda não foi configurada.
+
+### 4. Testar Conexão
 
 ```python
 # test_integration.py

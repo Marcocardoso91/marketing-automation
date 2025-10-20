@@ -39,8 +39,14 @@ FACEBOOK_AD_ACCOUNT_ID=act_123456789
 
 # Já configurado
 N8N_WEBHOOK_URL=https://fluxos.macspark.dev/webhook
+N8N_API_URL=https://fluxos.macspark.dev/api/v1
+N8N_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 SLACK_WEBHOOK_URL=https://hooks.slack.com/...
 WHATSAPP_ALERT_PHONE=+5531993676989
+
+# Notion MCP (obrigatório para usar /api/v1/notion/*)
+NOTION_API_TOKEN=secret_xxx
+NOTION_DATABASE_ID=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
 
 ### 3. Executar

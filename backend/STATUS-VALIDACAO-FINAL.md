@@ -21,6 +21,8 @@
 
 **Status Geral:** 🟢 **PRONTO PARA USO**
 
+> ⚠️ Integrações Notion e n8n dependem das variáveis `NOTION_API_TOKEN`, `NOTION_DATABASE_ID`, `N8N_API_URL` e `N8N_API_KEY`. Quando não configuradas, os endpoints correspondentes retornam HTTP 503 indicando que o MCP externo ainda não está habilitado.
+
 ---
 
 ## ✅ O QUE FOI TESTADO E VALIDADO

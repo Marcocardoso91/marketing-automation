@@ -11,6 +11,7 @@ from src.integrations.n8n_manager import get_n8n_manager
 from src.utils.logger import setup_logger
 from src.utils.auth import get_current_user
 from src.utils.rate_limit import limiter
+from src.utils.exceptions import N8NConnectionError
 
 router = APIRouter()
 logger = setup_logger(__name__)
@@ -24,7 +25,7 @@ class CreateAlertsWorkflowPayload(BaseModel):
 
 def _ensure_feature_available(identifier: str, result: Any) -> None:
     """Raise HTTP 501 when MCP integration is not available"""
-    if result in (None, [], {}):
+    if result is None:
         raise HTTPException(
             status_code=501,
             detail=f"{identifier} is not available because n8n MCP integration is not enabled",
@@ -49,6 +50,13 @@ async def list_n8n_workflows(
         _ensure_feature_available("Workflow listing", workflows)
         return workflows
 
+    except N8NConnectionError as exc:
+        logger.error("n8n integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -80,6 +88,13 @@ async def create_metrics_workflow(
             "status": "created"
         }
 
+    except N8NConnectionError as exc:
+        logger.error("n8n integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -121,6 +136,13 @@ async def create_alerts_workflow(
             "channels": ["slack", "email"]
         }
 
+    except N8NConnectionError as exc:
+        logger.error("n8n integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -150,6 +172,13 @@ async def validate_workflow(
         _ensure_feature_available("Workflow validation", validation)
         return validation
 
+    except N8NConnectionError as exc:
+        logger.error("n8n integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except HTTPException:
         raise
     except Exception as e:

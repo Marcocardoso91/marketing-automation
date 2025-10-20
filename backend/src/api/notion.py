@@ -15,6 +15,7 @@ from src.automation.campaign_optimizer import CampaignOptimizer
 from src.utils.logger import setup_logger
 from src.utils.auth import get_current_user
 from src.utils.rate_limit import limiter
+from src.utils.exceptions import NotionAPIError
 
 router = APIRouter()
 logger = setup_logger(__name__)
@@ -86,7 +87,7 @@ async def save_campaign_report_to_notion(
         # Salvar no Notion
         notion_client = get_notion_client(database_id)
         page_url = await notion_client.create_campaign_report(
-            campaign, insights, score, suggestions
+            campaign, insights, score, suggestions, database_id=database_id
         )
 
         return {
@@ -96,6 +97,13 @@ async def save_campaign_report_to_notion(
             "score": score
         }
 
+    except NotionAPIError as exc:
+        logger.error("Notion integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -162,7 +170,8 @@ async def create_daily_summary_notion(
             total_spend=total_spend,
             campaigns_analyzed=len(campaigns_with_insights),
             top_performers=top_performers,
-            underperformers=categorized['underperforming']
+            underperformers=categorized['underperforming'],
+            database_id=database_id,
         )
 
         return {
@@ -173,6 +182,13 @@ async def create_daily_summary_notion(
             "campaigns_analyzed": len(campaigns_with_insights)
         }
 
+    except NotionAPIError as exc:
+        logger.error("Notion integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except Exception as e:
         logger.error(f"Error creating daily summary: {e}")
         raise HTTPException(500, str(e))
@@ -198,11 +214,18 @@ async def search_notion_reports(
     """
     try:
         # P0 #4 - Implemented real Notion search
-        client = get_notion_client()
+        client = get_notion_client(database_id)
         results = await client.search_pages(query, database_id)
         logger.info(f"Found {len(results)} results for query: {query}")
         return results
 
+    except NotionAPIError as exc:
+        logger.error("Notion integration error: %s", exc.message)
+        status = exc.details.get("status") if isinstance(exc.details, dict) else None
+        raise HTTPException(
+            status_code=status if isinstance(status, int) else 503,
+            detail=exc.message,
+        )
     except Exception as e:
         logger.error(f"Error searching Notion: {e}")
         raise HTTPException(500, str(e))

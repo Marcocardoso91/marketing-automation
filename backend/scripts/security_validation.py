@@ -56,15 +56,20 @@ def check_tests():
     print("\n2. Verificando testes...")
 
     try:
-        result = subprocess.run(['python', '-m', 'pytest', 'tests/unit', '-v', '--tb=short'],
+        python_exec = sys.executable or 'python3'
+        result = subprocess.run([python_exec, '-m', 'pytest', 'tests/unit', '-v', '--tb=short'],
                                 capture_output=True, text=True, cwd=project_root)
         if result.returncode == 0:
             print("   [OK] Testes unitarios passando")
             return True
         else:
             print("   [ERRO] Testes unitarios falhando")
-            print(f"   Erro: {result.stderr}")
-            return False
+            output = result.stderr or result.stdout
+            if output:
+                print(f"   Detalhes: {output}")
+            else:
+                print("   Detalhes: saída vazia (verifique dependências instaladas).")
+        return False
     except Exception as e:
         print(f"   [ERRO] Erro ao executar testes: {e}")
         return False
@@ -155,11 +160,19 @@ def check_security_scans():
                                 capture_output=True, text=True, cwd=project_root)
         if result.returncode == 0:
             print("   [OK] Bandit: 0 issues HIGH/MEDIUM")
+        elif result.returncode in (127,):
+            print("   [AVISO] Bandit nao instalado (instale com `pip install bandit`)")
         else:
-            print("   [ERRO] Bandit encontrou issues")
-            print(f"   {result.stdout}")
+            output = result.stdout or result.stderr or ""
+            if "ModuleNotFoundError" in output and "pbr" in output:
+                print("   [AVISO] Bandit instalado, porém depende do pacote `pbr` (instale com `pip install pbr`).")
+            else:
+                print("   [ERRO] Bandit encontrou issues")
+                print(f"   {output}")
+    except FileNotFoundError:
+        print("   [AVISO] Bandit nao encontrado no PATH (instale com `pip install bandit`)")
     except Exception as e:
-        print(f"   [AVISO] Bandit nao disponivel: {e}")
+        print(f"   [AVISO] Falha ao executar Bandit: {e}")
 
     return True
 

@@ -34,6 +34,10 @@ FACEBOOK_ACCESS_TOKEN=seu_token_aqui
 FACEBOOK_AD_ACCOUNT_ID=act_123456789
 ANALYTICS_API_KEY=chave_gerada_acima
 SECRET_KEY=chave_gerada_acima
+N8N_API_URL=https://fluxos.macspark.dev/api/v1
+N8N_API_KEY=sua_chave_n8n
+NOTION_API_TOKEN=secret_xxx
+NOTION_DATABASE_ID=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
 # Recomendado
 SUPABASE_URL=https://seu-projeto.supabase.co

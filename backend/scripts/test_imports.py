@@ -11,6 +11,11 @@ Usage:
     python scripts/test_imports.py
 """
 import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(REPO_ROOT / "shared"))
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -34,6 +39,12 @@ def test_import(module_path: str, expected_symbols: list) -> bool:
 
         print(f"{GREEN}[OK]{RESET} {module_path}")
         return True
+    except ModuleNotFoundError as exc:
+        hint = ""
+        if exc.name == "marketing_shared":
+            hint = " (execute `pip install -e ./shared` na raiz do projeto)"
+        print(f"{RED}[FAIL]{RESET} {module_path} - {str(exc)[:80]}{hint}")
+        return False
     except Exception as e:
         print(f"{RED}[FAIL]{RESET} {module_path} - {str(e)[:80]}")
         return False

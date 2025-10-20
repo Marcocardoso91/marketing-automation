@@ -6,6 +6,8 @@
 **Método:** Sequential Thinking + Exa Search + Context7  
 **Status (histórico):** Documento refere-se à validação de 18/10/2025. Consulte `RELATORIO-CORRECOES-PENDENTES.md` para o status atual.
 
+> ⚠️ Atualização 20/10/2025: as integrações do MCP (Notion e n8n) agora retornam HTTP 503 quando os tokens/URLs não estão configurados. Configure `NOTION_API_TOKEN`, `NOTION_DATABASE_ID`, `N8N_API_URL` e `N8N_API_KEY` antes de repetir os testes descritos aqui.
+
 ---
 
 ## 🎯 METODOLOGIA DE VALIDAÇÃO
