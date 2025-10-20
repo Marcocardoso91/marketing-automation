@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "name": "dashboard-sabrina-costa-backend",
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["gru1"]
+}
+
