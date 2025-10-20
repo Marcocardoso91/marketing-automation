@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push origin main)",
+      "Bash(git checkout src/agents/facebook_agent.py)",
+      "Bash(git add Macspark/marketing-automation/api/src/utils/token_manager.py Macspark/marketing-automation/api/src/utils/database.py)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor(p1-7): migrar exceções críticas em token_manager e database\n\nImplementa migração parcial Phase 1 do P1 #7.\nRefatora exceções genéricas para customizadas em 2 arquivos críticos.\n\n## Arquivos Migrados (2/4 Phase 1)\n\n### 1. src/utils/token_manager.py\n**Mudanças**:\n- Adicionado import: InvalidTokenError, FacebookConnectionError\n- Linha 43: `raise Exception(\"Token inválido\")` \n  → `raise InvalidTokenError(message=..., details={...})`\n- Agora retorna erro estruturado com token_expiry nos details\n\n**Impacto**: \n- Melhores mensagens de erro de autenticação\n- Error code específico: INVALID_TOKEN\n- Contexto adicional para debugging\n\n### 2. src/utils/database.py\n**Mudanças**:\n- Adicionado import: DatabaseQueryError, logger\n- Linha 42: `except Exception:` → adiciona log antes de rollback\n- Mantém re-raise mas com log estruturado\n\n**Impacto**:\n- Melhor rastreamento de erros de database\n- Logs estruturados para debugging\n- Preparado para usar DatabaseQueryError futuramente\n\n## Status P1 #7\n\n**Progresso**: 2/4 arquivos Phase 1 (50%)\n**Migrado**: 2 exceções genéricas → customizadas\n**Pendente**: \n- auth.py (1 exceção - é safety fallback válido)\n- facebook_agent.py (3 exceções - próximo)\n\n## Benefícios Imediatos\n\n1. **Token errors** agora retornam:\n```json\n{\n  \"error\": \"INVALID_TOKEN\",\n  \"message\": \"Token validation failed - token is invalid or expired\",\n  \"details\": {\"token_expiry\": \"2025-10-20T12:00:00\"}\n}\n```\n\n2. **Database errors** agora tem logs estruturados antes de rollback\n\n## Próximos Passos\n\n- [ ] Migrar facebook_agent.py (3 exceções)\n- [ ] Migrar outros 58 handlers (Phase 2-4)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git add Macspark/marketing-automation/.claude/settings.local.json)",
+      "Bash(git commit -m \"chore(marketing-automation): atualizar configurações locais Claude\n\nAtualização de settings locais do Claude Code para o projeto.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\")",
+      "Bash(git push origin main --dry-run)",
+      "Bash(git push -u origin main)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
