@@ -295,7 +295,7 @@ async def search_notion(
 
 ## 🔗 Referências
 
-- Issue P0 #4: [MCP não implementado](https://github.com/Marcocardoso28/mcp-orchestrator/issues/4)
+- Issue P0 #4: [MCP não implementado](https://github.com/Marcocardoso91/mcp-orchestrator/issues/4)
 - Arquivo: [api/src/api/notion.py:196](c:/Users/marco/Macspark/marketing-automation/api/src/api/notion.py#L196)
 - Notion API Search: https://developers.notion.com/reference/post-search
 - NotionClient: [api/src/integrations/notion_client.py](c:/Users/marco/Macspark/marketing-automation/api/src/integrations/notion_client.py)

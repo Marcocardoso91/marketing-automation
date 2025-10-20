@@ -322,7 +322,7 @@ alembic upgrade head
 
 ## 🔗 Referências
 
-- Issue P0 #6: [Migration hashed_password](https://github.com/Marcocardoso28/mcp-orchestrator/issues/6)
+- Issue P0 #6: [Migration hashed_password](https://github.com/Marcocardoso91/mcp-orchestrator/issues/6)
 - Alembic Docs: https://alembic.sqlalchemy.org/en/latest/
 - FastAPI + Databases: https://fastapi.tiangolo.com/tutorial/sql-databases/
 - PostgreSQL Docker: https://hub.docker.com/_/postgres

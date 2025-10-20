@@ -361,8 +361,8 @@ docker-compose -f docker-compose.integrated.yml restart
 
 ### Suporte
 
-- **Issues:** https://github.com/Marcocardoso28/marketing-automation/issues
-- **Docs:** https://github.com/Marcocardoso28/marketing-automation/tree/main/docs
+- **Issues:** https://github.com/Marcocardoso91/marketing-automation/issues
+- **Docs:** https://github.com/Marcocardoso91/marketing-automation/tree/main/docs
 
 ---
 

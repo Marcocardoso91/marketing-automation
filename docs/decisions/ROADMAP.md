@@ -183,12 +183,12 @@
 ## 🔗 Links Importantes
 
 ### GitHub
-- **Issues**: [Ver todas as issues](https://github.com/Marcocardoso28/marketing-automation/issues)
-- **Project Board**: [Kanban Board](https://github.com/Marcocardoso28/marketing-automation/projects)
+- **Issues**: [Ver todas as issues](https://github.com/Marcocardoso91/marketing-automation/issues)
+- **Project Board**: [Kanban Board](https://github.com/Marcocardoso91/marketing-automation/projects)
 - **Milestones**:
-  - [Sprint 1 - Críticos](https://github.com/Marcocardoso28/marketing-automation/milestone/1)
-  - [Sprint 2 - Qualidade](https://github.com/Marcocardoso28/marketing-automation/milestone/2)
-  - [Sprint 3 - DevOps](https://github.com/Marcocardoso28/marketing-automation/milestone/3)
+  - [Sprint 1 - Críticos](https://github.com/Marcocardoso91/marketing-automation/milestone/1)
+  - [Sprint 2 - Qualidade](https://github.com/Marcocardoso91/marketing-automation/milestone/2)
+  - [Sprint 3 - DevOps](https://github.com/Marcocardoso91/marketing-automation/milestone/3)
 
 ### Documentação
 - [Análise Técnica Completa](./ANALISE-TECNICA-COMPLETA.md)
@@ -204,7 +204,7 @@
 ```bash
 # Configure suas credenciais
 export GITHUB_TOKEN=your_github_personal_access_token
-export GITHUB_REPO=owner/repo  # ex: Marcocardoso28/marketing-automation
+export GITHUB_REPO=owner/repo  # ex: Marcocardoso91/marketing-automation
 
 # Execute o script
 cd scripts

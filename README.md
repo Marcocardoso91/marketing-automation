@@ -2,7 +2,7 @@
 
 > Monorepo que agrupa os componentes de automação (Agent API), analytics e o pacote Python compartilhado.
 
-[![Issues](https://img.shields.io/github/issues/Marcocardoso28/marketing-automation)](https://github.com/Marcocardoso28/marketing-automation/issues)
+[![Issues](https://img.shields.io/github/issues/Marcocardoso91/marketing-automation)](https://github.com/Marcocardoso91/marketing-automation/issues)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -17,7 +17,7 @@
 | **Cobertura de Testes** | ⚠️ Parcial (muitos skips) |
 | **Segurança** | 🔴 Atenção necessária |
 
-**📋 [Ver Roadmap Completo](./ROADMAP.md)** | **📊 [Análise Técnica](./ANALISE-TECNICA-COMPLETA.md)** | **🐛 [Issues](https://github.com/Marcocardoso28/marketing-automation/issues)**
+**📋 [Ver Roadmap Completo](./docs/decisions/ROADMAP.md)** | **📊 [Análise Técnica](./docs/archive/ANALISE-TECNICA-COMPLETA.md)** | **🐛 [Issues](https://github.com/Marcocardoso91/marketing-automation/issues)**
 
 ---
 

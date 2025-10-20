@@ -82,8 +82,8 @@ marketing-automation/
 
 ## 🔗 Links Úteis
 
-- **Repositório:** [GitHub](https://github.com/Marcocardoso28/marketing-automation)
-- **Issues:** [GitHub Issues](https://github.com/Marcocardoso28/marketing-automation/issues)
+- **Repositório:** [GitHub](https://github.com/Marcocardoso91/marketing-automation)
+- **Issues:** [GitHub Issues](https://github.com/Marcocardoso91/marketing-automation/issues)
 - **API Docs:** http://localhost:8000/docs (quando rodando)
 - **Superset:** http://localhost:8088 (quando rodando)
 
