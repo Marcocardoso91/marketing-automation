@@ -43,8 +43,10 @@
 **Novo no projeto?** Comece por:
 
 1. **[README.md](../README.md)** na raiz - Visão geral
-2. **[QUICK-START.md](./development/QUICK-START.md)** - Setup em 15 minutos
-3. **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md)** - Entender a arquitetura
+2. **[👉-COMECE-AQUI.md](../👉-COMECE-AQUI.md)** - Guia de início
+3. **[QUICK-START.md](./development/QUICK-START.md)** - Setup em 15 minutos
+4. **[USER-GUIDE.md](./USER-GUIDE.md)** - Guia de uso diário
+5. **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md)** - Entender a arquitetura
 
 **Desenvolvedor?**
 1. **[CONTRIBUTING.md](./development/CONTRIBUTING.md)** - Diretrizes de contribuição
