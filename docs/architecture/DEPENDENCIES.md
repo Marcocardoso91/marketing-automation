@@ -6,7 +6,7 @@ Este documento consolida os arquivos de dependências existentes no monorepo e e
 
 | Caminho | Uso | Observações |
 |---------|-----|-------------|
-| `api/requirements.txt` | Ambiente da Agent API (FastAPI + Celery + tests). | Necessário para rodar os serviços web e as tasks. |
+| `backend/requirements.txt` | Ambiente da Agent API (FastAPI + Celery + tests). | Necessário para rodar os serviços web e as tasks. |
 | `analytics/scripts/requirements.txt` | Scripts Python (ex.: `metrics-to-supabase.py`). | Install apenas quando for executar os scripts localmente. |
 | `analytics/scripts/requirements-dev.txt` | Dependências adicionais de desenvolvimento para os scripts. | Opcional. |
 | `shared/pyproject.toml` | Pacote `marketing_shared` (instalável via `pip install -e shared`). | Fornece schemas/utilitários compartilhados. |
@@ -14,7 +14,7 @@ Este documento consolida os arquivos de dependências existentes no monorepo e e
 
 ## Recomendações
 
-1. **Isolar ambientes**: crie virtualenvs separados para `api/` e `analytics/` quando precisar trabalhar nos dois componentes simultaneamente.
+1. **Isolar ambientes**: crie virtualenvs separados para `backend/` e `analytics/` quando precisar trabalhar nos dois componentes simultaneamente.
 2. **Instalação local do pacote compartilhado**:
    ```bash
    pip install -e shared

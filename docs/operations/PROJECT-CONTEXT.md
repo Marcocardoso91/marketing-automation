@@ -219,7 +219,7 @@ pytest tests/integration/ -v
 
 - Adicione um teste em `tests/integration/`
 - Modifique um schema em `shared/marketing_shared/schemas/`
-- Crie um novo endpoint em `api/src/api/`
+- Crie um novo endpoint em `backend/src/api/`
 
 ### Passo 5: Abra um Pull Request
 

@@ -42,7 +42,7 @@ Existem **2 significados** diferentes de MCP no projeto:
 #### 2. "Notion MCP" no Código Python (Interno - NÃO IMPLEMENTADO ❌)
 **Descrição**: Código Python que deveria chamar Notion API
 **Status**: ❌ **FAKE - retorna [] sempre**
-**Localização**: `api/src/api/notion.py:196`
+**Localização**: `backend/src/api/notion.py:196`
 **Funcionando**: NÃO - é stub/placeholder
 
 ---

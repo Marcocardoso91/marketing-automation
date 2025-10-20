@@ -269,7 +269,7 @@ class AgentAPIClient:
 
 ### 3.2 Agent API - Endpoint de Exportação
 
-**Arquivo:** `api/src/api/metrics.py`
+**Arquivo:** `backend/src/api/metrics.py`
 
 **Endpoint:**
 ```http
@@ -487,7 +487,7 @@ def get_meta_ads_from_agent() -> List[Dict]:
 
 **Configuração:**
 
-**Agent API** (`api/.env`):
+**Agent API** (`backend/.env`):
 ```bash
 ANALYTICS_API_KEY=your_secure_analytics_api_key_here_min_32_chars
 ```

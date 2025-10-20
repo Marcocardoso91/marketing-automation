@@ -90,7 +90,7 @@ Crie o arquivo com 4 playbooks essenciais:
 
 ## Estrutura
 - `tests/integration/` - Testes de integração Agent API ↔ Analytics
-- `api/tests/` - Testes unitários Agent API
+- `backend/tests/` - Testes unitários Agent API
 - `analytics/tests/` - Testes unitários Analytics
 
 ## Como Rodar
@@ -350,7 +350,7 @@ Ao criar novos documentos, use como referência:
 ### Por que centralizar docs em `marketing-automation/docs/`?
 
 Porque facilita navegação. Atualmente:
-- Runbook está em `api/docs/` → difícil de achar
+- Runbook está em `backend/docs/` → difícil de achar
 - Context está em `analytics/context/` → só para Analytics
 
 Com centralização: tudo em `docs/` → fácil de encontrar via INDEX.md
@@ -359,7 +359,7 @@ Com centralização: tudo em `docs/` → fácil de encontrar via INDEX.md
 
 **NÃO!** Mantenha ambos:
 - `marketing-automation/docs/` → docs **consolidados** (use este)
-- `api/docs/` e `analytics/docs/` → docs **específicos** de cada projeto
+- `backend/docs/` e `analytics/docs/` → docs **específicos** de cada projeto
 
 Adicione nota no topo dos docs originais:
 ```markdown
