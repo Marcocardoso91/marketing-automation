@@ -21,6 +21,14 @@
 
 ---
 
+## 🚀 Início Rápido
+
+**Quer começar AGORA?** → **[START-HERE.md](START-HERE.md)** - Guia completo em 3 passos (30-45 minutos)
+
+**Documentação completa** → [docs/INDEX.md](docs/INDEX.md)
+
+---
+
 ## Visão Geral
 
 | Diretório  | Descrição | Status atual |
