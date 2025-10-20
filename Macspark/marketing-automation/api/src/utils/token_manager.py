@@ -7,6 +7,10 @@ from datetime import datetime, timedelta
 from typing import Optional
 from src.utils.config import settings
 from src.utils.logger import setup_logger
+from src.utils.exceptions import (
+    InvalidTokenError,
+    FacebookConnectionError
+)
 
 logger = setup_logger(__name__)
 
@@ -40,7 +44,10 @@ class TokenManager:
 
     def get_valid_token(self) -> str:
         if not self._check_token_validity():
-            raise Exception("Token inválido")
+            raise InvalidTokenError(
+                message="Token validation failed - token is invalid or expired",
+                details={"token_expiry": str(self.token_expiry) if self.token_expiry else None}
+            )
         return self.current_token
 
 

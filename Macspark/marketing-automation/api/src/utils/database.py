@@ -4,6 +4,10 @@ Setup SQLAlchemy async para PostgreSQL
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from src.utils.config import settings
+from src.utils.exceptions import DatabaseQueryError
+from src.utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 # Base declarativa para modelos
 Base = declarative_base()
@@ -39,7 +43,9 @@ async def get_async_session() -> AsyncSession:
         try:
             yield session
             await session.commit()
-        except Exception:
+        except Exception as e:
+            logger.error(f"Database session error: {e}")
+            #
             await session.rollback()
             raise
         finally:
