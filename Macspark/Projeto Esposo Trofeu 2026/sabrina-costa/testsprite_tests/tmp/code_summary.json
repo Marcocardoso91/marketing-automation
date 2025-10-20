@@ -1,0 +1,153 @@
+{
+  "tech_stack": [
+    "JavaScript",
+    "Node.js 18+",
+    "Express 4.x",
+    "PostgreSQL 15",
+    "HTML5",
+    "Tailwind CSS 3.4",
+    "Alpine.js 3.x",
+    "Chart.js 4.x",
+    "Day.js",
+    "JWT Authentication",
+    "bcryptjs",
+    "n8n Automation",
+    "Vercel (deployment)"
+  ],
+  "features": [
+    {
+      "name": "Sistema de Autenticação",
+      "description": "Login/logout com JWT, proteção de rotas, gerenciamento de sessão",
+      "files": [
+        "frontend/index.html",
+        "frontend/assets/js/auth.js",
+        "backend/api/auth.js",
+        "backend/utils/jwt.js"
+      ]
+    },
+    {
+      "name": "Dashboard Principal",
+      "description": "Dashboard executivo com 4 KPIs (CTR, CPC, Seguidores, Investimento), 2 gráficos Chart.js, filtros de período",
+      "files": [
+        "frontend/dashboard.html",
+        "frontend/assets/js/api.js"
+      ]
+    },
+    {
+      "name": "Cronograma de Posts",
+      "description": "Timeline visual de 4 semanas com posts planejados, filtros por semana/formato/status",
+      "files": [
+        "frontend/cronograma.html",
+        "backend/api/schedule.js"
+      ]
+    },
+    {
+      "name": "Biblioteca de Ganchos Virais",
+      "description": "50 ganchos organizados por categoria com busca e filtros, contador de uso",
+      "files": [
+        "frontend/ganchos.html",
+        "backend/api/hooks.js",
+        "backend/db/schema.sql"
+      ]
+    },
+    {
+      "name": "Checklist de Produção",
+      "description": "Checklist interativo para produção de conteúdo com progresso visual",
+      "files": [
+        "frontend/checklist.html"
+      ]
+    },
+    {
+      "name": "Relatórios Semanais",
+      "description": "Relatórios compilados com export PDF, gráficos de performance",
+      "files": [
+        "frontend/relatorios.html"
+      ]
+    },
+    {
+      "name": "Configurações de Alertas",
+      "description": "Interface para configurar thresholds, números WhatsApp, horários de alertas",
+      "files": [
+        "frontend/configuracoes.html",
+        "backend/api/config.js",
+        "backend/utils/config.js"
+      ]
+    },
+    {
+      "name": "API de Métricas",
+      "description": "CRUD completo de métricas do Instagram (CTR, CPC, CPM, seguidores), cálculos automáticos, validações",
+      "files": [
+        "backend/api/metrics.js",
+        "backend/db/schema.sql"
+      ]
+    },
+    {
+      "name": "Webhook Receiver",
+      "description": "Endpoint para receber dados do n8n via webhook, suporta CSV e JSON, validações e parsing",
+      "files": [
+        "backend/api/webhook.js"
+      ]
+    },
+    {
+      "name": "Sistema de Alertas",
+      "description": "Verificação automática de thresholds, geração de alertas, persistência no banco",
+      "files": [
+        "backend/api/alerts.js",
+        "backend/utils/alerts.js"
+      ]
+    },
+    {
+      "name": "Banco de Dados PostgreSQL",
+      "description": "Schema com 6 tabelas (users, metrics, alerts, posts, hooks, config), índices otimizados, triggers, views, functions, seed data",
+      "files": [
+        "backend/db/schema.sql",
+        "backend/db/connection.js"
+      ]
+    },
+    {
+      "name": "n8n Workflow: Processar Métricas",
+      "description": "Recebe CSV/JSON via webhook, valida, calcula campos derivados, salva no banco, verifica thresholds",
+      "files": [
+        "n8n/workflows/01-receber-metricas.json"
+      ]
+    },
+    {
+      "name": "n8n Workflow: Alertas WhatsApp",
+      "description": "Cron diário às 18h, verifica métricas do dia, compara com thresholds, envia alertas via Evolution API",
+      "files": [
+        "n8n/workflows/02-alertas-whatsapp.json"
+      ]
+    },
+    {
+      "name": "n8n Workflow: Relatório Diário",
+      "description": "Cron diário às 18h05, compila métricas, calcula comparações, envia relatório formatado via WhatsApp",
+      "files": [
+        "n8n/workflows/03-relatorio-diario.json"
+      ]
+    },
+    {
+      "name": "n8n Workflow: Lembretes de Postagem",
+      "description": "Cron múltiplos horários (11h, 17h30), verifica cronograma, envia lembretes com hook e CTA via WhatsApp",
+      "files": [
+        "n8n/workflows/04-lembretes-postagem.json"
+      ]
+    },
+    {
+      "name": "Integração WhatsApp (Evolution API)",
+      "description": "Envio de mensagens via Evolution API para alertas, relatórios e lembretes",
+      "files": [
+        "n8n/workflows/02-alertas-whatsapp.json",
+        "n8n/workflows/03-relatorio-diario.json",
+        "n8n/workflows/04-lembretes-postagem.json"
+      ]
+    },
+    {
+      "name": "Testes Unitários",
+      "description": "Testes com Jest para funções críticas de alertas",
+      "files": [
+        "backend/__tests__/alerts.test.js"
+      ]
+    }
+  ]
+}
+
