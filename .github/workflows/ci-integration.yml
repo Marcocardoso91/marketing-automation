@@ -77,9 +77,9 @@ jobs:
       
       - name: Install API dependencies
         run: |
-          cd api
+          cd backend
           pip install -r requirements.txt
-      
+
       - name: Run API tests
         env:
           DATABASE_URL: postgresql://postgres:test_password@localhost:5432/test_db
@@ -87,7 +87,7 @@ jobs:
           SECRET_KEY: test_secret_key_min_32_characters_long
           ANALYTICS_API_KEY: test_analytics_key
         run: |
-          cd api
+          cd backend
           pytest tests/ -v --cov=src --cov-report=xml || true
 
   test-integration:
@@ -128,5 +128,5 @@ jobs:
         run: pip install black
       
       - name: Check formatting with Black
-        run: black --check shared/marketing_shared/ api/src/ analytics/scripts/ || true
+        run: black --check shared/marketing_shared/ backend/src/ analytics/scripts/ || true
 

@@ -26,6 +26,16 @@
 - [INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md) - Guia de integração completo
 - [PROJECT-CONTEXT.md](./operations/PROJECT-CONTEXT.md) - Contexto e histórico do projeto
 
+### 📊 Analytics
+
+- [Analytics README](../analytics/README.md) - Visão geral do analytics (pipelines, workflows N8N, BI)
+- [Analytics Docs](../analytics/docs/README.md) - Documentação histórica do Projeto Sabrina (v3.0)
+- Guias de Setup:
+  - [Setup Supabase](../analytics/docs/setup-supabase.md) - Data warehouse gratuito
+  - [Setup N8N](../analytics/docs/setup-n8n-meta-ads.md) - Workflows automatizados
+  - [Setup Apache Superset](../analytics/docs/setup-apache-superset.md) - Business Intelligence
+  - [Setup Slack](../analytics/docs/setup-slack.md) - Notificações
+
 ### 📋 Decisões
 
 - [ACOES-RECOMENDADAS.md](./decisions/ACOES-RECOMENDADAS.md) - Ações recomendadas para melhorias
@@ -54,8 +64,13 @@
 3. **[Analytics README](../analytics/README.md)** - Documentação específica do analytics
 
 **DevOps?**
-1. **[Infrastructure](../infrastructure/)** - Configs Docker, monitoring, CI/CD
-2. **[INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md)** - Guia de deploy
+1. **[Infrastructure README](../infrastructure/README.md)** - Configs Docker, monitoring, CI/CD
+2. **[CI/CD Workflows](../.github/workflows/)** - GitHub Actions (testes, linting, Docker builds)
+3. **[INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md)** - Guia de deploy
+
+**Analytics/BI?**
+1. **[Analytics README](../analytics/README.md)** - Pipelines de dados e workflows
+2. **[Setup Guides](../analytics/docs/)** - Guias de setup das ferramentas
 
 ---
 
