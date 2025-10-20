@@ -1,0 +1,293 @@
+{
+  "name": "Sabrina_02_AlertasWhatsApp",
+  "active": false,
+  "id": "sabrina-02-alertas-whatsapp",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 18,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "name": "Cron - 18h Diariamente",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.API_BASE_URL}}/api/metrics?date={{$now.format('YYYY-MM-DD')}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.API_TOKEN || ''}}"
+            },
+            {
+              "name": "X-Webhook-Token",
+              "value": "={{$env.WEBHOOK_SECRET}}"
+            }
+          ]
+        }
+      },
+      "name": "GET Métricas Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.API_BASE_URL}}/api/alerts/config",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.API_TOKEN || ''}}"
+            },
+            {
+              "name": "X-Webhook-Token",
+              "value": "={{$env.WEBHOOK_SECRET}}"
+            }
+          ]
+        }
+      },
+      "name": "GET Config Alertas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        640,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const metricsResponse = $items(\"GET Métricas Hoje\", 0, 0)[0].json;\nconst configResponse = $json;\nconst metrics = (metricsResponse.data || [])[0];\nconst thresholds = configResponse.data.thresholds;\nconst alerts = [];\n\nif (!metrics) {\n  return [{ json: { hasAlerts: false, message: 'Nenhuma métrica registrada hoje.' } }];\n}\n\nif (metrics.ctr < thresholds.ctr_min) {\n  alerts.push(`⚠️ *CTR abaixo da meta*\\nValor: ${metrics.ctr}% | Meta: ${thresholds.ctr_min}%`);\n}\nif (metrics.cpc > thresholds.cpc_max) {\n  alerts.push(`⚠️ *CPC alto*\\nValor: R$${metrics.cpc} | Meta: R$${thresholds.cpc_max}`);\n}\nif (metrics.cpm && metrics.cpm > thresholds.cpm_max) {\n  alerts.push(`⚠️ *CPM alto*\\nValor: R$${metrics.cpm} | Meta: R$${thresholds.cpm_max}`);\n}\nif (metrics.frequency > thresholds.frequency_max) {\n  alerts.push(`⚠️ *Frequência alta*\\nValor: ${metrics.frequency} | Meta: ${thresholds.frequency_max}`);\n}\nif (metrics.cost_per_follower && metrics.cost_per_follower > thresholds.cost_per_follower_max) {\n  alerts.push(`⚠️ *Custo por seguidor alto*\\nValor: R$${metrics.cost_per_follower} | Meta: R$${thresholds.cost_per_follower_max}`);\n}\n\nreturn [{ json: { metrics, alerts, hasAlerts: alerts.length > 0 } }];"
+      },
+      "name": "Verificar Thresholds",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        860,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.hasAlerts}}",
+              "operation": "equal",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Tem Alertas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const { alerts, metrics } = $json;\nconst date = new Date(metrics.date).toLocaleDateString('pt-BR');\n\nconst message = [\n  `🚨 *ALERTAS DE MÉTRICAS*` ,\n  `Data: ${date}`,\n  '',\n  alerts.join('\\n\\n'),\n  '',\n  '📊 *Resumo do dia*',\n  `• CTR: ${metrics.ctr}%`,\n  `• CPC: R$${metrics.cpc}`,\n  `• Frequência: ${metrics.frequency}`,\n  `• Seguidores: ${metrics.new_followers || 'N/A'}`,\n  `• Investimento: R$${metrics.cost}`,\n  '',\n  `🔗 Dashboard: ${$env.DASHBOARD_URL || 'https://dashboard-sabrina.vercel.app'}`\n].join('\\n');\n\nreturn [{ json: { message, alerts } }];"
+      },
+      "name": "Formatar Mensagem",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EVOLUTION_API_URL}}/message/sendText/{{$env.WHATSAPP_INSTANCE}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.EVOLUTION_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={\n  \"number\": \"{{$env.WHATSAPP_NUMBER}}\",\n  \"text\": $json.message\n}",
+        "sendBody": true,
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1520,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.API_BASE_URL}}/api/alerts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Token",
+              "value": "={{$env.WEBHOOK_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={\n  \"type\": \"daily_threshold\",\n  \"message\": \"Alertas enviados via WhatsApp\",\n  \"metadata\": {\n    \"alerts\": $json.alerts,\n    \"date\": $json.metrics.date\n  }\n}",
+        "sendBody": true
+      },
+      "name": "Registrar Alerta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1740,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { message: 'Sem alertas críticos hoje.' } }];"
+      },
+      "name": "Sem Alertas",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        440
+      ]
+    }
+  ],
+  "connections": {
+    "Cron - 18h Diariamente": {
+      "main": [
+        [
+          {
+            "node": "GET Métricas Hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Métricas Hoje": {
+      "main": [
+        [
+          {
+            "node": "GET Config Alertas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Config Alertas": {
+      "main": [
+        [
+          {
+            "node": "Verificar Thresholds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Thresholds": {
+      "main": [
+        [
+          {
+            "node": "Tem Alertas?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Alertas?": {
+      "main": [
+        [
+          {
+            "node": "Sem Alertas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Registrar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "regular"
+  },
+  "meta": {
+    "template": "docs/N8N-WORKFLOWS.md#workflow-2-alertas-whatsapp"
+  },
+  "tags": [
+    "Sabrina",
+    "Alertas"
+  ]
+}

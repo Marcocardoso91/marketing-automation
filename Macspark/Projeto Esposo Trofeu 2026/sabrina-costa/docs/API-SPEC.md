@@ -428,6 +428,45 @@ Content-Type: application/json
 
 ---
 
+### POST /api/schedule
+Criar um novo item no cronograma (apenas admin).
+
+**Request:**
+```http
+POST /api/schedule
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "date": "2025-10-24",
+  "weekNumber": 2,
+  "format": "carousel",
+  "theme": "Checklist de Stories",
+  "hook": "Você esquece desses 3 passos?",
+  "cta": "Salva pra revisar depois",
+  "objective": "Engajamento",
+  "storiesIdeas": "Bastidores + enquete + CTA"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "623e4567-e89b-12d3-a456-426614174070",
+    "date": "2025-10-24",
+    "weekNumber": 2,
+    "format": "carousel",
+    "theme": "Checklist de Stories",
+    "status": "planned",
+    "createdAt": "2025-10-20T15:00:00Z"
+  }
+}
+```
+
+---
+
 ## Alertas
 
 ### GET /api/alerts
@@ -751,6 +790,85 @@ Authorization: Bearer <token>
 
 ---
 
+### GET /api/config/:key
+Obter uma chave específica (`thresholds`, `whatsapp`, `alertsSchedule`, `general`).
+
+**Request:**
+```http
+GET /api/config/thresholds
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "ctrMin": 1.5,
+    "cpcMax": 0.70,
+    "cpmMax": 10.0,
+    "frequencyMax": 3.0,
+    "costPerFollowerMax": 1.30
+  }
+}
+```
+
+---
+
+### PUT /api/config
+Atualizar múltiplas configurações (apenas admin).
+
+**Request:**
+```http
+PUT /api/config
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "thresholds": {
+    "ctrMin": 1.6,
+    "cpcMax": 0.65
+  },
+  "general": {
+    "timezone": "America/Sao_Paulo",
+    "currency": "BRL",
+    "language": "pt-BR"
+  }
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Configurações atualizadas com sucesso",
+  "data": {
+    "thresholds": {
+      "ctrMin": 1.6,
+      "cpcMax": 0.65,
+      "cpmMax": 10.0,
+      "frequencyMax": 3.0,
+      "costPerFollowerMax": 1.30
+    },
+    "whatsapp": {
+      "number": "+5511999999999",
+      "enabled": true
+    },
+    "alertsSchedule": {
+      "dailyReport": "18:00",
+      "postReminders": ["11:00", "17:30"]
+    },
+    "general": {
+      "timezone": "America/Sao_Paulo",
+      "currency": "BRL",
+      "language": "pt-BR"
+    }
+  }
+}
+```
+
+---
+
 ## Ganchos
 
 ### GET /api/hooks
@@ -820,6 +938,36 @@ Authorization: Bearer <token>
     "id": "a23e4567-e89b-12d3-a456-426614174009",
     "usageCount": 6
   }
+}
+```
+
+---
+
+### GET /api/hooks/categories/list
+Listar categorias disponíveis (para filtros do frontend).
+
+**Request:**
+```http
+GET /api/hooks/categories/list
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": [
+    "Curiosidade",
+    "Urgência",
+    "Transformação",
+    "Identificação",
+    "Lista/Número",
+    "Desafio",
+    "Comparação",
+    "História",
+    "Pergunta",
+    "Autoridade"
+  ]
 }
 ```
 

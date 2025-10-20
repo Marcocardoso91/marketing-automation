@@ -71,7 +71,8 @@ sabrina-costa/
 │   ├── PRD.md                     # Product Requirements Document
 │   ├── ARQUITETURA.md             # Arquitetura do sistema
 │   ├── API-SPEC.md                # Especificação da API REST
-│   └── N8N-WORKFLOWS.md           # Documentação dos workflows
+│   ├── N8N-WORKFLOWS.md           # Documentação dos workflows
+│   └── DEPLOY.md                  # Guia de deploy e QA
 │
 ├── frontend/                      # 🎨 Interface web
 │   ├── index.html                 # Página de login
@@ -97,11 +98,16 @@ sabrina-costa/
 │   │   ├── auth.js                # Endpoints de autenticação
 │   │   ├── metrics.js             # Endpoints de métricas
 │   │   ├── webhook.js             # Webhook receiver (n8n)
-│   │   └── alerts.js              # Endpoints de alertas
+│   │   ├── alerts.js              # Endpoints de alertas
+│   │   ├── schedule.js            # Cronograma de posts
+│   │   ├── hooks.js               # Biblioteca de ganchos
+│   │   └── config.js              # Configurações do sistema
 │   ├── db/
 │   │   ├── schema.sql             # Schema do banco
 │   │   └── connection.js          # Conexão PostgreSQL
 │   ├── utils/
+│   │   ├── alerts.js              # Regras de thresholds
+│   │   ├── config.js              # Acesso a configurações
 │   │   └── jwt.js                 # Utilitários JWT
 │   ├── package.json               # Dependências Node.js
 │   └── .env.example               # Exemplo de variáveis

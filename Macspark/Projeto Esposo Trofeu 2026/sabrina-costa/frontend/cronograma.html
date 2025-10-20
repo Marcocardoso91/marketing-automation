@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma | Dashboard Sabrina</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Day.js -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/locale/pt-br.js"></script>
+
+    <style>
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.35s ease-out; }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="scheduleApp()" x-init="init()">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-gray-900">Dashboard Sabrina</span>
+                    </div>
+
+                    <div class="hidden md:ml-10 md:flex md:space-x-4">
+                        <a href="dashboard.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Dashboard
+                        </a>
+                        <a href="cronograma.html" class="px-3 py-2 rounded-md text-sm font-medium bg-purple-50 text-purple-700">
+                            Cronograma
+                        </a>
+                        <a href="ganchos.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Ganchos
+                        </a>
+                        <a href="checklist.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Checklist
+                        </a>
+                        <a href="relatorios.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Relatórios
+                        </a>
+                        <a href="configuracoes.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Configurações
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button @click="refresh()" class="p-2 rounded-lg hover:bg-gray-100 transition" :class="{ 'animate-spin': loading }">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition">
+                            <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-sm" x-text="user.name.charAt(0).toUpperCase()"></span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 hidden sm:block" x-text="user.name"></span>
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div x-show="open"
+                             @click.away="open = false"
+                             x-transition
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10"
+                             style="display: none;">
+                            <a href="configuracoes.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                ⚙️ Configurações
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Cronograma Estratégico</h1>
+                <p class="text-sm text-gray-600 mt-1">Planejamento de 4 semanas com temas, formatos e CTAs definidos.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <select x-model="filters.week" @change="applyFilters"
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500">
+                    <option value="all">Todas as semanas</option>
+                    <template x-for="week in weeks" :key="week">
+                        <option :value="week" x-text="'Semana ' + week"></option>
+                    </template>
+                </select>
+
+                <select x-model="filters.status" @change="applyFilters"
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500">
+                    <option value="all">Todos status</option>
+                    <option value="planned">Planejado</option>
+                    <option value="posted">Publicado</option>
+                    <option value="cancelled">Cancelado</option>
+                </select>
+
+                <select x-model="filters.format" @change="applyFilters"
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500">
+                    <option value="all">Todos formatos</option>
+                    <option value="reel">Reels</option>
+                    <option value="carousel">Carrossel</option>
+                    <option value="stories">Stories</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Loading -->
+        <div x-show="loading" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-600">Carregando cronograma...</p>
+        </div>
+
+        <!-- Content -->
+        <div x-show="!loading" x-transition style="display: none;">
+            <template x-if="groupedPosts.length === 0">
+                <div class="bg-white border border-dashed border-gray-300 rounded-xl p-12 text-center">
+                    <p class="text-gray-500 text-sm">Nenhum post encontrado para os filtros selecionados.</p>
+                </div>
+            </template>
+
+            <div class="space-y-6">
+                <template x-for="group in groupedPosts" :key="group.week">
+                    <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-up">
+                        <header class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">Semana <span x-text="group.week"></span></h2>
+                                <p class="text-sm text-gray-500" x-text="group.summary"></p>
+                            </div>
+                            <span class="text-sm font-medium px-3 py-1 rounded-full bg-purple-50 text-purple-700">
+                                <span x-text="group.posts.length"></span> posts
+                            </span>
+                        </header>
+
+                        <div class="divide-y divide-gray-100">
+                            <template x-for="post in group.posts" :key="post.id">
+                                <article class="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <span class="text-xs font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full"
+                                                  :class="formatBadgeClass(post.format)" x-text="post.formatLabel"></span>
+                                            <span class="flex items-center text-sm text-gray-500">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                                                </svg>
+                                                <span x-text="formatDate(post.date)"></span>
+                                            </span>
+                                            <span class="flex items-center text-sm text-gray-500">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path>
+                                                </svg>
+                                                <span x-text="'CTA: ' + (post.cta || 'Definir')"></span>
+                                            </span>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-gray-900" x-text="post.theme"></h3>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            <strong>Gancho:</strong> <span x-text="post.hook || 'Adicionar gancho'"></span>
+                                        </p>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            <strong>Objetivo:</strong> <span x-text="post.objective || 'Definir objetivo'"></span>
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2" x-show="post.storiesIdeas">
+                                            Stories: <span x-text="post.storiesIdeas"></span>
+                                        </p>
+                                    </div>
+
+                                    <div class="flex flex-col sm:items-end gap-2 min-w-[180px]">
+                                        <span class="text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full"
+                                              :class="statusBadgeClass(post.status)"
+                                              x-text="statusLabel(post.status)"></span>
+
+                                        <div class="flex gap-2">
+                                            <button @click="markAsPosted(post)"
+                                                    class="px-3 py-2 text-sm font-medium rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 transition"
+                                                    :disabled="post.status === 'posted'">
+                                                ✅ Marcar como publicado
+                                            </button>
+                                            <button @click="openDetails(post)"
+                                                    class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                                                Ver detalhes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </article>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div x-show="modals.details.open" class="fixed inset-0 bg-black/40 flex items-center justify-center z-30"
+         x-transition style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full mx-4 overflow-hidden">
+            <header class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900" x-text="modals.details.post.theme"></h3>
+                    <p class="text-sm text-gray-500" x-text="formatDate(modals.details.post.date)"></p>
+                </div>
+                <button @click="modals.details.open = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </header>
+
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                        <p class="text-xs text-purple-600 font-semibold uppercase tracking-wide">Formato</p>
+                        <p class="text-lg font-semibold text-purple-800" x-text="modals.details.post.formatLabel"></p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                        <p class="text-xs text-blue-600 font-semibold uppercase tracking-wide">Status</p>
+                        <p class="text-lg font-semibold text-blue-800" x-text="statusLabel(modals.details.post.status)"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase text-gray-500 mb-1">Gancho</p>
+                    <p class="text-sm text-gray-700 bg-gray-50 rounded-lg p-3" x-text="modals.details.post.hook || 'Adicionar gancho'"></p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase text-gray-500 mb-1">CTA principal</p>
+                    <p class="text-sm text-gray-700 bg-gray-50 rounded-lg p-3" x-text="modals.details.post.cta || 'Definir CTA'"></p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase text-gray-500 mb-1">Objetivo</p>
+                    <p class="text-sm text-gray-700 bg-gray-50 rounded-lg p-3" x-text="modals.details.post.objective || 'Definir objetivo'"></p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase text-gray-500 mb-1">Stories complementares</p>
+                    <p class="text-sm text-gray-700 bg-gray-50 rounded-lg p-3" x-text="modals.details.post.storiesIdeas || 'Sem stories complementares definidos.'"></p>
+                </div>
+            </div>
+
+            <footer class="bg-gray-50 border-t border-gray-200 px-6 py-4 text-right">
+                <button @click="modals.details.open = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+                    Fechar
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        function scheduleApp() {
+            return {
+                user: {},
+                loading: true,
+                posts: [],
+                groupedPosts: [],
+                weeks: [1, 2, 3, 4],
+                filters: {
+                    week: 'all',
+                    status: 'all',
+                    format: 'all',
+                },
+                modals: {
+                    details: {
+                        open: false,
+                        post: {},
+                    },
+                },
+
+                async init() {
+                    dayjs.locale('pt-br');
+                    this.user = Auth.getUser() || { name: 'Usuário' };
+                    await this.loadPosts();
+                    this.applyFilters();
+                    this.loading = false;
+                },
+
+                async loadPosts() {
+                    // Mock data for protótipo
+                    const baseDate = dayjs();
+                    const formats = ['reel', 'carousel', 'stories'];
+                    const themes = [
+                        'Transformação Antes/Depois',
+                        'Bastidores do Processo',
+                        'Rotina Realista',
+                        'Checklist de Autocuidado',
+                        'Resultados Semanais',
+                        'Erros Comuns e Correções'
+                    ];
+
+                    this.posts = [];
+                    for (let week = 1; week <= 4; week++) {
+                        for (let i = 0; i < 3; i++) {
+                            this.posts.push({
+                                id: `${week}-${i}`,
+                                date: baseDate.add((week - 1) * 7 + i * 2, 'day').format('YYYY-MM-DD'),
+                                weekNumber: week,
+                                format: formats[i % formats.length],
+                                formatLabel: formats[i % formats.length] === 'reel' ? 'Reels' :
+                                    formats[i % formats.length] === 'carousel' ? 'Carrossel' : 'Stories',
+                                theme: themes[(week + i) % themes.length],
+                                hook: 'Você precisa ver isso AGORA',
+                                cta: ['Salva pra lembrar', 'Comenta SIM se você quer', 'Compartilha com uma amiga'][i % 3],
+                                objective: ['Engajamento', 'Conversão', 'Autoridade'][i % 3],
+                                storiesIdeas: 'Bastidores + Enquete + CTA final',
+                                status: week === 1 && i === 0 ? 'posted' : 'planned',
+                            });
+                        }
+                    }
+
+                    // Em produção, substituir pelo endpoint real:
+                    // const response = await API.schedule.getAll();
+                    // this.posts = response.data;
+                },
+
+                applyFilters() {
+                    let list = [...this.posts];
+
+                    if (this.filters.week !== 'all') {
+                        list = list.filter(post => Number(post.weekNumber) === Number(this.filters.week));
+                    }
+
+                    if (this.filters.status !== 'all') {
+                        list = list.filter(post => post.status === this.filters.status);
+                    }
+
+                    if (this.filters.format !== 'all') {
+                        list = list.filter(post => post.format === this.filters.format);
+                    }
+
+                    const grouped = {};
+                    list.forEach((post) => {
+                        if (!grouped[post.weekNumber]) {
+                            grouped[post.weekNumber] = [];
+                        }
+                        grouped[post.weekNumber].push(post);
+                    });
+
+                    this.groupedPosts = Object.entries(grouped)
+                        .sort(([a], [b]) => Number(a) - Number(b))
+                        .map(([week, posts]) => {
+                            const sortedPosts = posts.sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
+                            const start = sortedPosts[0] ? dayjs(sortedPosts[0].date).format('DD/MM') : '';
+                            const end = sortedPosts[sortedPosts.length - 1]
+                                ? dayjs(sortedPosts[sortedPosts.length - 1].date).format('DD/MM')
+                                : '';
+                            return {
+                                week,
+                                posts: sortedPosts,
+                                summary: `${start} • ${end}`,
+                            };
+                        });
+                },
+
+                refresh() {
+                    this.loading = true;
+                    setTimeout(() => {
+                        this.loading = false;
+                    }, 800);
+                },
+
+                formatBadgeClass(format) {
+                    switch (format) {
+                        case 'reel':
+                            return 'bg-purple-100 text-purple-700';
+                        case 'carousel':
+                            return 'bg-blue-100 text-blue-700';
+                        case 'stories':
+                            return 'bg-emerald-100 text-emerald-700';
+                        default:
+                            return 'bg-gray-100 text-gray-600';
+                    }
+                },
+
+                statusBadgeClass(status) {
+                    switch (status) {
+                        case 'posted':
+                            return 'bg-green-100 text-green-700';
+                        case 'cancelled':
+                            return 'bg-red-100 text-red-700';
+                        default:
+                            return 'bg-yellow-100 text-yellow-700';
+                    }
+                },
+
+                statusLabel(status) {
+                    return {
+                        planned: 'Planejado',
+                        posted: 'Publicado',
+                        cancelled: 'Cancelado',
+                    }[status] || 'Planejado';
+                },
+
+                formatDate(date) {
+                    return dayjs(date).format('DD/MM (ddd)');
+                },
+
+                async markAsPosted(post) {
+                    post.status = 'posted';
+                    post.postedAt = dayjs().toISOString();
+                    this.applyFilters();
+
+                    // Produção: await API.schedule.update(post.id, { status: 'posted' });
+                },
+
+                openDetails(post) {
+                    this.modals.details.post = post;
+                    this.modals.details.open = true;
+                },
+            }
+        }
+    </script>
+</body>
+</html>
