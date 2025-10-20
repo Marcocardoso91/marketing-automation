@@ -25,7 +25,7 @@ ISSUES = [
         "title": "[P0][SECURITY] Credenciais reais expostas no .env versionado",
         "body": """## 🔴 CRÍTICO - Segurança
 
-**Arquivo**: `api/.env`
+**Arquivo**: `backend/.env`
 
 ### Descrição
 Credenciais reais estão versionadas no git:
@@ -39,7 +39,7 @@ Credenciais reais estão versionadas no git:
 ### Solução
 ```bash
 # 1. Remover do git
-git rm --cached api/.env
+git rm --cached backend/.env
 
 # 2. Atualizar .gitignore
 echo "**/.env" >> .gitignore
@@ -80,7 +80,7 @@ git push
         "title": "[P0][SECURITY] TokenBlacklist em memória perde estado ao reiniciar",
         "body": """## 🔴 CRÍTICO - Segurança
 
-**Arquivo**: `api/src/utils/security.py:99-132`
+**Arquivo**: `backend/src/utils/security.py:99-132`
 
 ### Descrição
 A classe `TokenBlacklist` usa `set()` em memória para armazenar tokens revogados. Ao reiniciar o servidor, todos os tokens revogados voltam a ser válidos.
@@ -143,8 +143,8 @@ class RedisTokenBlacklist:
         "body": """## 🟠 ALTO - Arquitetura
 
 **Arquivos**:
-- `api/src/integrations/notion_client.py`
-- `api/src/integrations/n8n_manager.py`
+- `backend/src/integrations/notion_client.py`
+- `backend/src/integrations/n8n_manager.py`
 
 ### Descrição
 Código de integração MCP são apenas placeholders que logam warnings:
@@ -198,7 +198,7 @@ A documentação promete features que não existem.
         "title": "[P0][PERF] FacebookAdsAgent recriado a cada request",
         "body": """## 🟠 ALTO - Performance
 
-**Arquivo**: `api/src/api/campaigns.py:16-22`
+**Arquivo**: `backend/src/backend/campaigns.py:16-22`
 
 ### Descrição
 O `Depends(get_facebook_agent)` cria nova instância do FacebookAdsAgent em **CADA request**:
@@ -273,13 +273,13 @@ def get_cached_facebook_agent() -> FacebookAdsAgent:
         "title": "[P0][DB] Migration faltando para coluna hashed_password",
         "body": """## 🔴 CRÍTICO - Database
 
-**Arquivo**: `api/alembic/versions/001_initial_schema.py`
+**Arquivo**: `backend/alembic/versions/001_initial_schema.py`
 
 ### Descrição
 O model `User` define `hashed_password`:
 
 ```python
-# api/src/models/user.py:19
+# backend/src/models/user.py:19
 class User(Base):
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 ```
@@ -343,7 +343,7 @@ def downgrade():
         "title": "[P1][CODE] 43 exceções genéricas sem contexto adequado",
         "body": """## 🟠 ALTO - Qualidade de Código
 
-**Localização**: 43 ocorrências em `api/src/`
+**Localização**: 43 ocorrências em `backend/src/`
 
 ### Descrição
 Tratamento genérico de erros que:
@@ -483,14 +483,14 @@ async def circuit_breaker_handler(request, exc):
         "body": """## 🟡 MÉDIO - Code Smell
 
 **Arquivos**:
-- `api/src/utils/api_client.py` - wrapper vazio
+- `backend/src/utils/api_client.py` - wrapper vazio
 - `shared/marketing_shared/utils/facebook_client.py` - implementação real
 
 ### Descrição
 Camada de indireção desnecessária que confunde:
 
 ```python
-# api/src/utils/api_client.py
+# backend/src/utils/api_client.py
 from marketing_shared.utils.facebook_client import FacebookClient
 
 def get_api_client():
@@ -505,7 +505,7 @@ def get_api_client():
 ### Solução
 ```bash
 # Remover o wrapper
-rm api/src/utils/api_client.py
+rm backend/src/utils/api_client.py
 
 # Atualizar imports
 # De:
@@ -534,7 +534,7 @@ from marketing_shared.utils.facebook_client import FacebookClient
         "title": "[P1][TEST] Muitos testes configurados como skip",
         "body": """## 🟠 ALTO - Testes
 
-**Arquivo**: `api/tests/test_suite_completa.py:12-14`
+**Arquivo**: `backend/tests/test_suite_completa.py:12-14`
 
 ### Descrição
 Testes marcados para skip quando não há `.env` ou n8n:
@@ -601,7 +601,7 @@ tests/
         "title": "[P1][OBS] Celery tasks sem métricas de erro",
         "body": """## 🟠 ALTO - Observabilidade
 
-**Arquivo**: `api/src/tasks/celery_app.py:26-43`
+**Arquivo**: `backend/src/tasks/celery_app.py:26-43`
 
 ### Descrição
 Tasks agendadas mas sem instrumentação:
@@ -682,7 +682,7 @@ def task_success_handler(sender=None, **kwargs):
         "title": "[P1][PERF] Índices de banco de dados faltando",
         "body": """## 🟡 MÉDIO - Performance
 
-**Arquivo**: `api/alembic/versions/`
+**Arquivo**: `backend/alembic/versions/`
 
 ### Descrição
 Queries comuns sem índices otimizados:
@@ -753,7 +753,7 @@ def downgrade():
         "title": "[P2][CODE] Validação de token síncrona em código async",
         "body": """## 🟡 MÉDIO - Code Quality
 
-**Arquivo**: `api/src/utils/token_manager.py:20-39`
+**Arquivo**: `backend/src/utils/token_manager.py:20-39`
 
 ### Descrição
 `_check_token_validity()` usa `requests.get()` síncrono em contexto async:
@@ -790,8 +790,8 @@ async def _check_token_validity(self) -> bool:
         "body": """## 🟡 MÉDIO - Documentação
 
 **Localização**:
-- `README.md` raiz vs `api/README.md` vs `analytics/README.md`
-- `api/docs/prd/facebook-ads-agent/*` vs `analytics/docs/prd/agente-facebook/*`
+- `README.md` raiz vs `backend/README.md` vs `analytics/README.md`
+- `backend/docs/prd/facebook-ads-agent/*` vs `analytics/docs/prd/agente-facebook/*`
 
 ### Problema
 READMEs com informações conflitantes, PRDs duplicados.
@@ -806,13 +806,13 @@ Consolidar em `docs/` centralizado:
 docs/
 ├── README.md (índice principal)
 ├── architecture/
-├── api/
+├── backend/
 ├── analytics/
 └── prd/
     └── agente-facebook/ (fonte única)
 
 # READMEs de subprojetos apenas linkam
-api/README.md → "Ver docs/ para documentação completa"
+backend/README.md → "Ver docs/ para documentação completa"
 ```
 
 ### Esforço
@@ -825,11 +825,11 @@ api/README.md → "Ver docs/ para documentação completa"
         "milestone": 2
     },
     {
-        "title": "[P2][DEPS] Dependências duplicadas entre api/ e analytics/",
+        "title": "[P2][DEPS] Dependências duplicadas entre backend/ e analytics/",
         "body": """## 🟡 MÉDIO - DevOps
 
 **Arquivos**:
-- `api/requirements.txt` - 58 linhas
+- `backend/requirements.txt` - 58 linhas
 - `analytics/scripts/requirements.txt` - 25 linhas
 - Duplicações: `requests`, `python-dotenv`, `openai`
 
@@ -859,7 +859,7 @@ requirements/
         "title": "[P2][PERF] Falta de paginação em endpoints de listagem",
         "body": """## 🟡 MÉDIO - Performance
 
-**Arquivo**: `api/src/api/campaigns.py:25`
+**Arquivo**: `backend/src/backend/campaigns.py:25`
 
 ### Descrição
 Endpoints podem retornar milhares de registros sem paginação.
@@ -894,8 +894,8 @@ async def list_campaigns(
 **Localização**: 7 TODOs espalhados no código
 
 Exemplos:
-- `api/src/agents/facebook_agent.py:237` - "TODO: Replace with LangChain"
-- `api/src/api/automation.py:131` - "TODO: Implement database query in Sprint 4"
+- `backend/src/agents/facebook_agent.py:237` - "TODO: Replace with LangChain"
+- `backend/src/backend/automation.py:131` - "TODO: Implement database query in Sprint 4"
 
 ### Solução
 Criar issues para cada TODO ou implementar/remover.
@@ -946,7 +946,7 @@ async def add_request_id(request: Request, call_next):
         "title": "[P3][DEPS] Versões de dependências defasadas",
         "body": """## 🟢 BAIXO - Dependências
 
-Versões antigas em `api/requirements.txt`:
+Versões antigas em `backend/requirements.txt`:
 - `fastapi==0.104.1` (atual: 0.110+)
 - `openai==1.3.7` (atual: 1.50+)
 - `langchain==0.0.340`
