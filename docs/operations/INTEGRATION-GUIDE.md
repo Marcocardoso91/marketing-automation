@@ -10,24 +10,77 @@ O sistema integrado combina:
 
 ### Fluxo de Dados
 
+```mermaid
+graph TD
+    subgraph "Data Sources"
+        FB[Facebook API]
+        GA[Google Analytics]
+        GADS[Google Ads]
+        YT[YouTube API]
+    end
+    
+    subgraph "Core Processing"
+        API[Agent API<br/>FastAPI]
+        DB[(PostgreSQL<br/>Agent DB)]
+        EXPORT[GET /api/v1/metrics/export]
+    end
+    
+    subgraph "Analytics Layer"
+        ANALYTICS[Analytics<br/>Python Scripts]
+        SUPABASE[(Supabase<br/>Data Warehouse)]
+    end
+    
+    subgraph "Visualization & AI"
+        SUPERSET[Apache Superset<br/>Dashboards]
+        OPENAI[OpenAI<br/>Insights]
+        SLACK[Slack<br/>Notifications]
+    end
+    
+    %% Data Flow
+    FB --> API
+    API --> DB
+    DB --> EXPORT
+    EXPORT --> ANALYTICS
+    
+    GA --> ANALYTICS
+    GADS --> ANALYTICS
+    YT --> ANALYTICS
+    
+    ANALYTICS --> SUPABASE
+    SUPABASE --> SUPERSET
+    SUPABASE --> OPENAI
+    OPENAI --> SLACK
 ```
-Facebook API
-     ↓
-Agent API (coleta Meta Ads uma vez)
-     ↓
-PostgreSQL (agent DB)
-     ↓
-GET /api/v1/metrics/export
-     ↓
-Analytics (busca via HTTP)
-     ↓
-Supabase (data warehouse) ← + GA4, Google Ads, YouTube
-     ↓
-Apache Superset (dashboards)
-     ↓
-OpenAI (insights IA)
-     ↓
-Slack (notificações)
+
+### Fluxo de Integração Detalhado
+
+```mermaid
+sequenceDiagram
+    participant FB as Facebook API
+    participant API as Agent API
+    participant DB as PostgreSQL
+    participant ANALYTICS as Analytics
+    participant SUPABASE as Supabase
+    participant SUPERSET as Apache Superset
+    participant USER as User
+    
+    Note over FB,USER: Coleta Diária Automática
+    
+    FB->>API: GET /campaigns (métricas)
+    API->>DB: Salvar dados
+    API->>API: Processar métricas
+    
+    Note over API,SUPABASE: Export para Analytics
+    
+    ANALYTICS->>API: GET /api/v1/metrics/export
+    API->>ANALYTICS: Retornar dados formatados
+    ANALYTICS->>SUPABASE: Consolidar dados
+    
+    Note over SUPABASE,USER: Visualização e Insights
+    
+    SUPABASE->>SUPERSET: Atualizar dashboards
+    USER->>SUPERSET: Acessar métricas
+    SUPERSET->>USER: Mostrar visualizações
 ```
 
 ## Endpoints de Integração

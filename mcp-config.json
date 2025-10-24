@@ -1,0 +1,133 @@
+{
+  "mcpServers": {
+    "marketing-automation-docs": {
+      "command": "node",
+      "args": ["mcp-server/dist/index.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "resources": {
+    "docs://marketing-automation/overview": {
+      "name": "Project Overview",
+      "description": "High-level overview of the Marketing Automation Platform",
+      "category": "getting-started",
+      "tags": ["overview", "introduction", "getting-started"]
+    },
+    "docs://marketing-automation/quick-start": {
+      "name": "Quick Start Guide",
+      "description": "15-minute setup guide for new users",
+      "category": "getting-started",
+      "tags": ["quick-start", "setup", "installation"]
+    },
+    "docs://marketing-automation/architecture/overview": {
+      "name": "Architecture Overview",
+      "description": "System architecture and design decisions",
+      "category": "architecture",
+      "tags": ["architecture", "design", "system"]
+    },
+    "docs://marketing-automation/guides/user/daily-usage": {
+      "name": "Daily Usage Guide",
+      "description": "How to use the system on a daily basis",
+      "category": "guides",
+      "tags": ["user-guide", "daily", "usage"]
+    },
+    "docs://marketing-automation/guides/developer/contributing": {
+      "name": "Contributing Guide",
+      "description": "How to contribute to the project",
+      "category": "guides",
+      "tags": ["developer", "contributing", "development"]
+    },
+    "docs://marketing-automation/guides/operations/deployment": {
+      "name": "Deployment Guide",
+      "description": "How to deploy the system to production",
+      "category": "guides",
+      "tags": ["operations", "deployment", "production"]
+    },
+    "docs://marketing-automation/api/agent-api/endpoints": {
+      "name": "Agent API Endpoints",
+      "description": "Complete reference for Agent API endpoints",
+      "category": "api",
+      "tags": ["api", "endpoints", "reference"]
+    },
+    "docs://marketing-automation/api/integrations/n8n": {
+      "name": "N8N Integration",
+      "description": "How to integrate with N8N workflows",
+      "category": "api",
+      "tags": ["integration", "n8n", "workflows"]
+    },
+    "docs://marketing-automation/reference/troubleshooting/common-issues": {
+      "name": "Common Issues",
+      "description": "Troubleshooting common problems",
+      "category": "reference",
+      "tags": ["troubleshooting", "issues", "problems"]
+    },
+    "docs://marketing-automation/reference/configuration/environment-variables": {
+      "name": "Environment Variables",
+      "description": "Complete list of environment variables",
+      "category": "reference",
+      "tags": ["configuration", "env-vars", "settings"]
+    }
+  },
+  "tools": {
+    "search_docs": {
+      "name": "Search Documentation",
+      "description": "Search through all documentation with semantic search",
+      "parameters": {
+        "query": {
+          "type": "string",
+          "description": "Search query",
+          "required": true
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of results",
+          "default": 10
+        }
+      }
+    },
+    "get_examples": {
+      "name": "Get Code Examples",
+      "description": "Get code examples for specific features",
+      "parameters": {
+        "feature": {
+          "type": "string",
+          "description": "Feature name to get examples for",
+          "required": true
+        }
+      }
+    },
+    "troubleshoot": {
+      "name": "Troubleshoot Issues",
+      "description": "Get troubleshooting help for specific errors",
+      "parameters": {
+        "error": {
+          "type": "string",
+          "description": "Error message or description",
+          "required": true
+        }
+      }
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-10-23T00:00:00Z",
+    "totalDocuments": 166,
+    "categories": [
+      "getting-started",
+      "architecture", 
+      "guides",
+      "api",
+      "reference",
+      "archive"
+    ],
+    "features": [
+      "semantic-search",
+      "code-examples",
+      "troubleshooting",
+      "resource-browsing",
+      "metadata-extraction"
+    ]
+  }
+}

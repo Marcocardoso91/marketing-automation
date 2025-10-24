@@ -6,6 +6,123 @@
 
 Sistema distribuído com arquitetura de microservices integrados via API REST.
 
+### Diagrama de Arquitetura Geral
+
+```mermaid
+graph TB
+    subgraph "External APIs"
+        FB[Facebook API]
+        GA[Google Analytics]
+        GADS[Google Ads]
+        YT[YouTube API]
+    end
+    
+    subgraph "Core Services"
+        API[Agent API<br/>FastAPI + PostgreSQL]
+        ANALYTICS[Analytics<br/>Python + Supabase]
+        N8N[N8N Workflows<br/>Automation]
+    end
+    
+    subgraph "Data Layer"
+        SUPABASE[Supabase<br/>Data Warehouse]
+        REDIS[Redis<br/>Cache + Sessions]
+    end
+    
+    subgraph "BI & Visualization"
+        SUPERSET[Apache Superset<br/>Dashboards]
+        NOTION[Notion<br/>Reports]
+    end
+    
+    subgraph "AI & Automation"
+        OPENAI[OpenAI<br/>Insights]
+        SLACK[Slack<br/>Notifications]
+    end
+    
+    %% Connections
+    FB --> API
+    GA --> ANALYTICS
+    GADS --> ANALYTICS
+    YT --> ANALYTICS
+    
+    API --> SUPABASE
+    ANALYTICS --> SUPABASE
+    N8N --> API
+    N8N --> ANALYTICS
+    
+    SUPABASE --> SUPERSET
+    SUPABASE --> NOTION
+    
+    API --> OPENAI
+    ANALYTICS --> SLACK
+    
+    API --> REDIS
+    ANALYTICS --> REDIS
+```
+
+### Fluxo de Dados
+
+```mermaid
+sequenceDiagram
+    participant FB as Facebook API
+    participant API as Agent API
+    participant N8N as N8N Workflows
+    participant SUPABASE as Supabase
+    participant SUPERSET as Apache Superset
+    participant USER as User
+    
+    Note over FB,USER: Coleta Diária de Métricas
+    
+    FB->>API: GET /campaigns (métricas)
+    API->>API: Processar dados
+    API->>SUPABASE: Salvar métricas
+    
+    Note over N8N,SUPERSET: Automação e Visualização
+    
+    N8N->>API: GET /metrics/export
+    API->>N8N: Retornar dados formatados
+    N8N->>SUPABASE: Consolidar dados
+    SUPABASE->>SUPERSET: Atualizar dashboards
+    
+    Note over USER: Análise e Insights
+    
+    USER->>SUPERSET: Acessar dashboards
+    SUPERSET->>USER: Mostrar métricas
+    USER->>API: Chat com IA
+    API->>USER: Insights e sugestões
+```
+
+### Fluxo de Autenticação
+
+```mermaid
+sequenceDiagram
+    participant USER as User
+    participant API as Agent API
+    participant DB as PostgreSQL
+    participant REDIS as Redis
+    
+    Note over USER,REDIS: Login Process
+    
+    USER->>API: POST /auth/login (email, password)
+    API->>DB: Verificar credenciais
+    DB->>API: Retornar user data
+    
+    alt Credenciais válidas
+        API->>API: Gerar JWT token
+        API->>REDIS: Armazenar sessão
+        API->>USER: Retornar JWT token
+    else Credenciais inválidas
+        API->>USER: 401 Unauthorized
+    end
+    
+    Note over USER,REDIS: Request com Token
+    
+    USER->>API: GET /campaigns (Authorization: Bearer token)
+    API->>REDIS: Verificar sessão
+    REDIS->>API: Sessão válida
+    API->>API: Validar JWT
+    API->>USER: Retornar dados
+```
+
 ## Componentes Principais
 
 ### 1. Agent API (facebook-ads-ai-agent)

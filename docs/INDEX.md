@@ -1,76 +1,81 @@
 # Índice da Documentação - Marketing Automation Platform
 
-## 📚 Navegação Rápida
+**Versão:** 2.0.0  
+**Última atualização:** 23 de Outubro, 2025  
+**Status:** ✅ Reestruturado e Otimizado com MCP
+
+---
+
+## 🚀 Navegação Rápida
+
+### 🎯 Getting Started
+- [QUICK-START.md](./getting-started/QUICK-START.md) - Início rápido (15 minutos)
+- [INSTALLATION.md](./getting-started/INSTALLATION.md) - Instalação detalhada (30-45 min)
+- [FIRST-STEPS.md](./getting-started/FIRST-STEPS.md) - Primeiros passos após instalação
 
 ### 🏗️ Arquitetura
+- [OVERVIEW.md](./architecture/ARCHITECTURE.md) - Visão geral da arquitetura
+- [DECISIONS.md](./architecture/ADR-CONSOLIDATED.md) - Architecture Decision Records
+- [DEPENDENCIES.md](./architecture/DEPENDENCIES.md) - Mapa de dependências
 
-- [ARCHITECTURE.md](./architecture/ARCHITECTURE.md) - Visão geral da arquitetura do sistema
-- [ADR-CONSOLIDATED.md](./architecture/ADR-CONSOLIDATED.md) - Architecture Decision Records (decisões técnicas)
-- [DEPENDENCIES.md](./architecture/DEPENDENCIES.md) - Mapa de dependências e pacotes
+### 📖 Guias por Tipo
+- **User Guides:** [USER-GUIDE.md](./USER-GUIDE.md) - Uso diário do sistema
+- **Developer:** [CONTRIBUTING.md](./development/CONTRIBUTING.md) - Como contribuir
+- **Operations:** [INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md) - Deploy e operações
 
-### 📦 Produto
+### 🔌 API & Integrações
+- **Agent API:** [API-REFERENCE.md](./api/agent-api/API-REFERENCE.md) - Endpoints completos
+- **N8N Integration:** [N8N-GUIDE.md](./api/integrations/N8N-GUIDE.md) - Workflows automatizados
+- **Notion Integration:** [NOTION-GUIDE.md](./api/integrations/NOTION-GUIDE.md) - Relatórios
 
-- [PRD-AGENT-API.md](./product/PRD-AGENT-API.md) - Product Requirements Document - Agent API
-- [PRD-ANALYTICS.md](./product/PRD-ANALYTICS.md) - Product Requirements Document - Analytics
-- [PRD-INTEGRATION.md](./product/PRD-INTEGRATION.md) - Product Requirements Document - Integração
-- [BACKLOG.md](./product/BACKLOG.md) - Backlog de features e melhorias
+### 📋 Referência
+- **Troubleshooting:** [TROUBLESHOOTING.md](./reference/troubleshooting/TROUBLESHOOTING.md) - Problemas comuns
+- **Configuration:** [ENV-VARS.md](./reference/configuration/ENV-VARS.md) - Variáveis de ambiente
+- **Glossary:** [GLOSSARY.md](./reference/GLOSSARY.md) - Termos técnicos
 
-### 💻 Desenvolvimento
+### 📊 Analytics & BI
+- [Analytics README](../analytics/README.md) - Visão geral do analytics
+- [Setup Supabase](../analytics/docs/setup-supabase.md) - Data warehouse
+- [Setup N8N](../analytics/docs/setup-n8n-meta-ads.md) - Workflows automatizados
+- [Setup Superset](../analytics/docs/setup-apache-superset.md) - Business Intelligence
 
-- [QUICK-START.md](./development/QUICK-START.md) - Guia de início rápido (15 minutos)
-- [CONTRIBUTING.md](./development/CONTRIBUTING.md) - Como contribuir com o projeto
-- [SETUP-DATABASE.md](./development/SETUP-DATABASE.md) - Configuração do banco de dados
-
-### 🚀 Operações
-
-- [INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md) - Guia de integração completo
-- [PROJECT-CONTEXT.md](./operations/PROJECT-CONTEXT.md) - Contexto e histórico do projeto
-
-### 📊 Analytics
-
-- [Analytics README](../analytics/README.md) - Visão geral do analytics (pipelines, workflows N8N, BI)
-- [Analytics Docs](../analytics/docs/README.md) - Documentação histórica do Projeto Sabrina (v3.0)
-- Guias de Setup:
-  - [Setup Supabase](../analytics/docs/setup-supabase.md) - Data warehouse gratuito
-  - [Setup N8N](../analytics/docs/setup-n8n-meta-ads.md) - Workflows automatizados
-  - [Setup Apache Superset](../analytics/docs/setup-apache-superset.md) - Business Intelligence
-  - [Setup Slack](../analytics/docs/setup-slack.md) - Notificações
-
-### 📋 Decisões
-
-- [ACOES-RECOMENDADAS.md](./decisions/ACOES-RECOMENDADAS.md) - Ações recomendadas para melhorias
-- [DECISAO-MCP.md](./decisions/DECISAO-MCP.md) - Decisões sobre integração MCP
-- [ROADMAP.md](./decisions/ROADMAP.md) - Roadmap de desenvolvimento
+### 🤖 MCP (Model Context Protocol)
+- [MCP-DOCUMENTATION-GUIDE.md](./MCP-DOCUMENTATION-GUIDE.md) - Guia completo de uso MCP
+- [mcp-config.json](../mcp-config.json) - Configuração MCP
+- [mcp-server/](../mcp-server/) - Servidor MCP implementado
 
 ### 📚 Arquivo Histórico
-
-- [Relatórios e Status](./archive/) - Relatórios históricos de implementação e validação
+- [Relatórios e Status](./archive/) - Relatórios históricos de implementação
 
 ---
 
 ## 🚀 Começando
 
-**Novo no projeto?** Comece por:
+### 👤 Novo no Projeto?
+1. **[README.md](../README.md)** - Visão geral do projeto
+2. **[QUICK-START.md](./getting-started/QUICK-START.md)** - Setup em 15 minutos
+3. **[USER-GUIDE.md](./USER-GUIDE.md)** - Guia de uso diário
+4. **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md)** - Entender a arquitetura
 
-1. **[README.md](../README.md)** na raiz - Visão geral
-2. **[👉-COMECE-AQUI.md](../👉-COMECE-AQUI.md)** - Guia de início
-3. **[QUICK-START.md](./development/QUICK-START.md)** - Setup em 15 minutos
-4. **[USER-GUIDE.md](./USER-GUIDE.md)** - Guia de uso diário
-5. **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md)** - Entender a arquitetura
-
-**Desenvolvedor?**
+### 👨‍💻 Desenvolvedor?
 1. **[CONTRIBUTING.md](./development/CONTRIBUTING.md)** - Diretrizes de contribuição
 2. **[Backend README](../backend/README.md)** - Documentação específica do backend
-3. **[Analytics README](../analytics/README.md)** - Documentação específica do analytics
+3. **[API-REFERENCE.md](./api/agent-api/API-REFERENCE.md)** - Referência completa da API
 
-**DevOps?**
+### 🔧 DevOps?
 1. **[Infrastructure README](../infrastructure/README.md)** - Configs Docker, monitoring, CI/CD
-2. **[CI/CD Workflows](../.github/workflows/)** - GitHub Actions (testes, linting, Docker builds)
-3. **[INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md)** - Guia de deploy
+2. **[INTEGRATION-GUIDE.md](./operations/INTEGRATION-GUIDE.md)** - Guia de deploy
+3. **[CI/CD Workflows](../.github/workflows/)** - GitHub Actions
 
-**Analytics/BI?**
+### 📊 Analytics/BI?
 1. **[Analytics README](../analytics/README.md)** - Pipelines de dados e workflows
 2. **[Setup Guides](../analytics/docs/)** - Guias de setup das ferramentas
+3. **[Superset Setup](../analytics/docs/setup-apache-superset.md)** - Business Intelligence
+
+### 🤖 Usando MCP?
+1. **[MCP-DOCUMENTATION-GUIDE.md](./MCP-DOCUMENTATION-GUIDE.md)** - Guia completo MCP
+2. **[mcp-config.json](../mcp-config.json)** - Configuração MCP
+3. **[mcp-server/](../mcp-server/)** - Servidor MCP implementado
 
 ---
 

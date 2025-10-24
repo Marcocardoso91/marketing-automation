@@ -55,39 +55,60 @@ marketing-automation/
 └── tests/            -> Testes de integração
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Pré-requisitos
 
-- Docker & Docker Compose
-- Python 3.12+
-- Git
+- ✅ Docker & Docker Compose
+- ✅ Python 3.12+
+- ✅ Git
+- ✅ Conta Facebook Business Manager
 
-### 2. Instalação básica
+### 2. Instalação Rápida (15 min)
 
 ```bash
 # Clone o repositório
 cd C:\Users\marco\Macspark\marketing-automation
 
-# Preparar variáveis para Agent API
-cp env.template .env
-# Edite .env com credenciais reais antes do deploy
-
-# Setup automatizado (Windows)
+# Setup automatizado
 .\scripts\setup.ps1
+
+# Editar credenciais
+notepad .env  # Configurar Facebook + Supabase
+
+# Subir serviços
+docker-compose -f docker-compose.integrated.yml up -d
 ```
 
-### 3. Subir a stack integrada (opcional)
+### 3. Verificar Sistema
 
 ```bash
-docker-compose -f docker-compose.integrated.yml up -d
-docker-compose -f docker-compose.integrated.yml logs -f
+# Health check
+.\scripts\health-check.ps1
+
+# Testar coleta de métricas
+cd analytics\scripts
+python metrics-to-supabase.py
 ```
 
-### 4. Endereços úteis
+### 4. Acessar Interfaces
 
-- Agent API: http://localhost:8000/docs  
-- Superset / Grafana / Prometheus: conforme perfis ativados no `docker-compose.integrated.yml`
+- **Agent API:** http://localhost:8000/docs (Swagger UI)
+- **Superset:** http://localhost:8088 (Dashboards BI)
+- **Prometheus:** http://localhost:9090 (Métricas)
+
+### 5. 🤖 MCP (Model Context Protocol)
+
+Para agentes de IA acessarem a documentação:
+
+```bash
+# Configurar MCP
+cd mcp-server
+npm install && npm run build
+
+# Usar com Claude Desktop ou outros clientes MCP
+# Ver: docs/MCP-DOCUMENTATION-GUIDE.md
+```
 
 ## Destaques por Componente
 
@@ -104,13 +125,22 @@ docker-compose -f docker-compose.integrated.yml logs -f
 - `marketing_shared` fornece schemas Pydantic e utilitários compartilhados.
 - Cliente HTTP com retry logic e wrapper unificado do Facebook Graph (`marketing_shared.utils.facebook_client`).
 
-## Documentação Essencial
+## 📚 Documentação Essencial
 
-- `docs/ARCHITECTURE.md` – visão macro da solução.
-- `docs/INTEGRATION-GUIDE.md` – guia de integração passo a passo.
-- PRDs consolidados em `analytics/docs/prd/agente-facebook/` (os arquivos em `api/docs/prd/facebook-ads-agent/` são apenas redirecionamentos).
-- `api/docs/MCP-INTEGRATION.md` – como conectar agentes via MCP (n8n/Notion) usando servidores externos.
-- `api/docs/CREDENCIAIS-TEMPORARIAS.md` – política de credenciais e boas práticas de segurança.
+### 🎯 Para Iniciantes
+- **[QUICK-START.md](docs/getting-started/QUICK-START.md)** – Setup em 15 minutos
+- **[USER-GUIDE.md](docs/USER-GUIDE.md)** – Guia de uso diário
+- **[INSTALLATION.md](docs/getting-started/INSTALLATION.md)** – Instalação detalhada
+
+### 🏗️ Arquitetura & Design
+- **[ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** – Visão macro da solução
+- **[INTEGRATION-GUIDE.md](docs/operations/INTEGRATION-GUIDE.md)** – Guia de integração
+- **[MCP-DOCUMENTATION-GUIDE.md](docs/MCP-DOCUMENTATION-GUIDE.md)** – MCP para agentes IA
+
+### 🔧 Desenvolvimento
+- **[CONTRIBUTING.md](docs/development/CONTRIBUTING.md)** – Como contribuir
+- **[API-REFERENCE.md](docs/api/agent-api/API-REFERENCE.md)** – Referência da API
+- **[TROUBLESHOOTING.md](docs/reference/troubleshooting/TROUBLESHOOTING.md)** – Problemas comuns
 
 ## Desenvolvimento
 

@@ -232,10 +232,11 @@ cd ..
 ## 📚 Documentação Completa
 
 **Para saber mais:**
-- **Guia Detalhado:** `docs/USER-GUIDE.md`
-- **Troubleshooting:** `docs/development/QUICK-START.md`
-- **Arquitetura:** `docs/architecture/ARCHITECTURE.md`
-- **Navegação:** `docs/INDEX.md`
+- **Guia Detalhado:** [docs/USER-GUIDE.md](docs/USER-GUIDE.md)
+- **Troubleshooting:** [docs/reference/troubleshooting/TROUBLESHOOTING.md](docs/reference/troubleshooting/TROUBLESHOOTING.md)
+- **Arquitetura:** [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)
+- **Navegação:** [docs/INDEX.md](docs/INDEX.md)
+- **MCP Guide:** [docs/MCP-DOCUMENTATION-GUIDE.md](docs/MCP-DOCUMENTATION-GUIDE.md) (para agentes IA)
 
 ---
 
@@ -291,4 +292,25 @@ python metrics-to-supabase.py
 ---
 
 **Próxima ação:** Executar PASSO 1 (configurar Facebook) → [docs/USER-GUIDE.md](docs/USER-GUIDE.md) tem o guia detalhado!
+
+---
+
+## 🤖 MCP (Model Context Protocol)
+
+Para agentes de IA acessarem a documentação automaticamente:
+
+```bash
+# Configurar servidor MCP
+cd mcp-server
+npm install && npm run build
+
+# Usar com Claude Desktop ou outros clientes MCP
+# Ver: docs/MCP-DOCUMENTATION-GUIDE.md
+```
+
+**Recursos MCP disponíveis:**
+- 🔍 Busca semântica na documentação
+- 📖 Leitura de recursos específicos
+- 🛠️ Exemplos de código automáticos
+- 🆘 Troubleshooting inteligente
 
