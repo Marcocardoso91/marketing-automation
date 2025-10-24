@@ -39,6 +39,11 @@
 - [Setup N8N](../analytics/docs/setup-n8n-meta-ads.md) - Workflows automatizados
 - [Setup Superset](../analytics/docs/setup-apache-superset.md) - Business Intelligence
 
+### 🚀 Produção & Deploy
+- [📋 Checklist de Produção](operations/PRODUCTION-READINESS-CHECKLIST.md) - O que falta para produção
+- [🚀 Guia de Deploy](operations/PRODUCTION-DEPLOYMENT-GUIDE.md) - Deploy completo em produção
+- [🔧 Setup Produção](../scripts/setup-production.sh) - Script automatizado de setup
+
 ### 🤖 MCP (Model Context Protocol)
 - [MCP-DOCUMENTATION-GUIDE.md](./MCP-DOCUMENTATION-GUIDE.md) - Guia completo de uso MCP
 - [mcp-config.json](../mcp-config.json) - Configuração MCP
